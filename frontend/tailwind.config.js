@@ -19,11 +19,11 @@ export default {
         },
         brand: '#714B67',
         surface: '#FFFFFF',
-        background: '#F8F9FA',
-        border: '#E8EBEF',
+        background: '#FCFCFD',
+        border: '#E5E7EB',
         text: {
-          primary: '#121C28',
-          secondary: '#4E444A',
+          primary: '#111827',
+          secondary: '#6B7280',
         },
         success: '#22C55E',
         warning: '#F59E0B',
@@ -32,8 +32,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Outfit', 'Manrope', 'sans-serif'],
-        handwritten: ['Caveat', 'cursive'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
       },
       borderRadius: {
         card: '14px',
