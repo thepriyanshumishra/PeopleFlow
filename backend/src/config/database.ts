@@ -1,0 +1,35 @@
+import { PrismaClient } from '@prisma/client';
+import { logger } from '../shared/utils/logger';
+
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  });
+};
+
+type PrismaClientSingleton = ReturnType<typeof prismaClientSingleton>;
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClientSingleton | undefined;
+};
+
+export const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
+
+export async function connectDatabase(): Promise<void> {
+  try {
+    await prisma.$connect();
+    logger.info('Database connected successfully');
+  } catch (error) {
+    logger.error('Failed to connect to database:', error);
+    process.exit(1);
+  }
+}
+
+export async function disconnectDatabase(): Promise<void> {
+  await prisma.$disconnect();
+  logger.info('Database disconnected');
+}

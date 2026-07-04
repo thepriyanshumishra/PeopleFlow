@@ -1,0 +1,255 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================
+// ROLES
+// ========================
+model Role {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique // "Admin" | "Employee"
+  description String?
+  users       User[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("roles")
+}
+
+// ========================
+// DEPARTMENTS
+// ========================
+model Department {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  employees   Employee[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@map("departments")
+}
+
+// ========================
+// USERS (Auth credentials)
+// ========================
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  roleId       Int       @map("role_id")
+  isActive     Boolean   @default(true) @map("is_active")
+  refreshToken String?   @map("refresh_token")
+  role         Role      @relation(fields: [roleId], references: [id])
+  employee     Employee?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@map("users")
+}
+
+// ========================
+// EMPLOYEES (HR Profile)
+// ========================
+model Employee {
+  id             Int       @id @default(autoincrement())
+  employeeCode   String    @unique @map("employee_code") // EMP001
+  firstName      String    @map("first_name")
+  lastName       String    @map("last_name")
+  email          String    @unique
+  phone          String?
+  address        String?
+  profilePicture String?   @map("profile_picture")
+  departmentId   Int       @map("department_id")
+  designation    String    @default("Employee")
+  joiningDate    DateTime  @map("joining_date")
+  status         String    @default("Active") // Active | Inactive
+  managerId      Int?      @map("manager_id")
+  userId         Int       @unique @map("user_id")
+
+  // Relations
+  department    Department        @relation(fields: [departmentId], references: [id])
+  user          User              @relation(fields: [userId], references: [id])
+  manager       Employee?         @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates  Employee[]        @relation("ManagerSubordinates")
+  attendance    AttendanceRecord[]
+  leaveRequests LeaveRequest[]    @relation("EmployeeLeaveRequests")
+  approvedLeaves LeaveRequest[]   @relation("ApprovedByEmployee")
+  payroll       Payroll[]
+  documents     Document[]
+  notifications Notification[]
+  leaveBalances LeaveBalance[]
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  @@index([departmentId])
+  @@index([userId])
+  @@index([status])
+  @@map("employees")
+}
+
+// ========================
+// ATTENDANCE
+// ========================
+model AttendanceRecord {
+  id             Int       @id @default(autoincrement())
+  employeeId     Int       @map("employee_id")
+  attendanceDate DateTime  @map("attendance_date")
+  checkIn        DateTime? @map("check_in")
+  checkOut       DateTime? @map("check_out")
+  totalHours     Float?    @map("total_hours")
+  status         String    @default("Absent") // Present | Absent | Half Day | Leave | Late
+  notes          String?
+  employee       Employee  @relation(fields: [employeeId], references: [id])
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@unique([employeeId, attendanceDate])
+  @@index([employeeId])
+  @@index([attendanceDate])
+  @@index([status])
+  @@map("attendance_records")
+}
+
+// ========================
+// LEAVE TYPES
+// ========================
+model LeaveType {
+  id                Int           @id @default(autoincrement())
+  name              String        @unique // Paid Leave | Sick Leave | Unpaid Leave
+  description       String?
+  maxDaysPerYear    Int           @default(21) @map("max_days_per_year")
+  requiresApproval  Boolean       @default(true) @map("requires_approval")
+  isPaid            Boolean       @default(true) @map("is_paid")
+  leaveRequests     LeaveRequest[]
+  leaveBalances     LeaveBalance[]
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  @@map("leave_types")
+}
+
+// ========================
+// LEAVE BALANCES
+// ========================
+model LeaveBalance {
+  id            Int       @id @default(autoincrement())
+  employeeId    Int       @map("employee_id")
+  leaveTypeId   Int       @map("leave_type_id")
+  year          Int
+  totalDays     Int       @map("total_days")
+  usedDays      Int       @default(0) @map("used_days")
+  remainingDays Int       @map("remaining_days")
+  employee      Employee  @relation(fields: [employeeId], references: [id])
+  leaveType     LeaveType @relation(fields: [leaveTypeId], references: [id])
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@unique([employeeId, leaveTypeId, year])
+  @@index([employeeId])
+  @@map("leave_balances")
+}
+
+// ========================
+// LEAVE REQUESTS
+// ========================
+model LeaveRequest {
+  id                  Int        @id @default(autoincrement())
+  employeeId          Int        @map("employee_id")
+  leaveTypeId         Int        @map("leave_type_id")
+  startDate           DateTime   @map("start_date")
+  endDate             DateTime   @map("end_date")
+  totalDays           Int        @map("total_days")
+  reason              String
+  aiSummary           String?    @map("ai_summary")
+  aiSuggestedType     String?    @map("ai_suggested_type")
+  aiPriority          String?    @map("ai_priority")
+  aiRecommendation    String?    @map("ai_recommendation")
+  status              String     @default("Pending") // Pending | Approved | Rejected
+  adminComment        String?    @map("admin_comment")
+  approvedById        Int?       @map("approved_by")
+  employee            Employee   @relation("EmployeeLeaveRequests", fields: [employeeId], references: [id])
+  leaveType           LeaveType  @relation(fields: [leaveTypeId], references: [id])
+  approvedBy          Employee?  @relation("ApprovedByEmployee", fields: [approvedById], references: [id])
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+
+  @@index([employeeId])
+  @@index([status])
+  @@index([leaveTypeId])
+  @@map("leave_requests")
+}
+
+// ========================
+// PAYROLL
+// ========================
+model Payroll {
+  id            Int       @id @default(autoincrement())
+  employeeId    Int       @map("employee_id")
+  basicSalary   Float     @map("basic_salary")
+  allowances    Float     @default(0)
+  deductions    Float     @default(0)
+  tax           Float     @default(0)
+  netSalary     Float     @map("net_salary")
+  payPeriod     DateTime  @map("pay_period") // First day of the salary month
+  paymentStatus String    @default("Pending") @map("payment_status") // Pending | Paid
+  updatedById   Int?      @map("updated_by")
+  employee      Employee  @relation(fields: [employeeId], references: [id])
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@unique([employeeId, payPeriod])
+  @@index([employeeId])
+  @@index([payPeriod])
+  @@map("payroll")
+}
+
+// ========================
+// DOCUMENTS
+// ========================
+model Document {
+  id         Int      @id @default(autoincrement())
+  employeeId Int      @map("employee_id")
+  name       String
+  type       String   // Resume | PAN | Aadhaar | Offer Letter | Certificate | Other
+  filePath   String   @map("file_path")
+  fileSize   Int?     @map("file_size")
+  mimeType   String?  @map("mime_type")
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([employeeId])
+  @@map("documents")
+}
+
+// ========================
+// NOTIFICATIONS
+// ========================
+model Notification {
+  id            Int       @id @default(autoincrement())
+  employeeId    Int?      @map("employee_id") // null = broadcast to all
+  title         String
+  message       String
+  type          String    @default("info") // info | success | warning | error
+  recipientType String    @default("individual") @map("recipient_type") // individual | all
+  isRead        Boolean   @default(false) @map("is_read")
+  actionUrl     String?   @map("action_url")
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@index([employeeId])
+  @@index([isRead])
+  @@map("notifications")
+}
