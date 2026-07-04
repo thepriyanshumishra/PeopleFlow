@@ -77,3 +77,11 @@ export const notificationsApi = {
 export const dashboardApi = {
   adminStats: () => api.get('/admin/dashboard/stats'),
 };
+
+// Activity Center
+export const activityApi = {
+  getFeed: (params?: object) => api.get('/activity', { params }),
+  getStats: () => api.get('/activity/stats'),
+  getSummary: () => api.get('/activity/summary'),
+};
+

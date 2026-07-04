@@ -54,12 +54,44 @@ export function LoginPage() {
           <div className="absolute top-20 left-20 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-20 right-20 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
           <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
-            <div className="mb-8 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/50 shadow-card">
-              <img
-                className="w-full max-w-sm drop-shadow-sm rounded-xl"
-                alt="Office worker sitting at a desk, Odoo-inspired illustration"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAobKscwwYihbvT8m7_fsHe1W5YJ1p5yhQNP4z3HlJoXu8lbLdNBJMphoCPrXua7EXHZpjxHGivV8JytM2i1StpCTeH_gqRSD7pnA93pDiK7HRFt9FArTkQYBlQjkWAfNuqgB1EDTDX0LmLfzIAjVlMjzVWwPRNmfOFQG82Tyj2uFD9XIKZ0ndLjY4iEoED8qrzVE5XpimcfK5qDr81qV2jD9jDz6mJFgtDUaqo0EIouvPa2G-S9WGO7X1DnqPt843JzE5SVlpN-hg"
-              />
+            <div className="mb-8 p-6 bg-white/40 backdrop-blur-md rounded-2xl border border-white/50 shadow-card flex items-center justify-center">
+              <svg viewBox="0 0 320 220" className="w-full max-w-sm drop-shadow-sm rounded-xl" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Background */}
+                <rect width="320" height="220" rx="16" fill="#F5F0F7"/>
+                {/* Desk */}
+                <rect x="40" y="140" width="240" height="12" rx="4" fill="#D4C5DC"/>
+                <rect x="60" y="152" width="12" height="50" rx="4" fill="#C4B5D5"/>
+                <rect x="248" y="152" width="12" height="50" rx="4" fill="#C4B5D5"/>
+                {/* Monitor */}
+                <rect x="90" y="70" width="140" height="90" rx="8" fill="#3D2B47"/>
+                <rect x="98" y="78" width="124" height="74" rx="4" fill="#F5F0F7"/>
+                {/* Screen content */}
+                <rect x="108" y="88" width="60" height="6" rx="3" fill="#714b67" opacity="0.7"/>
+                <rect x="108" y="100" width="80" height="4" rx="2" fill="#C4B5D5"/>
+                <rect x="108" y="110" width="70" height="4" rx="2" fill="#C4B5D5"/>
+                <rect x="108" y="120" width="50" height="4" rx="2" fill="#C4B5D5"/>
+                {/* Chart on screen */}
+                <rect x="185" y="100" width="6" height="30" rx="2" fill="#714b67" opacity="0.6"/>
+                <rect x="196" y="108" width="6" height="22" rx="2" fill="#714b67" opacity="0.4"/>
+                <rect x="207" y="95" width="6" height="35" rx="2" fill="#714b67" opacity="0.8"/>
+                {/* Monitor stand */}
+                <rect x="148" y="160" width="24" height="10" rx="3" fill="#4A3355"/>
+                <rect x="135" y="168" width="50" height="6" rx="3" fill="#4A3355"/>
+                {/* Keyboard */}
+                <rect x="95" y="175" width="100" height="14" rx="4" fill="#E0D8E8"/>
+                {/* Coffee cup */}
+                <rect x="240" y="125" width="22" height="28" rx="5" fill="white" stroke="#C4B5D5" strokeWidth="1.5"/>
+                <path d="M262 135 Q272 135 272 145 Q272 155 262 155" stroke="#C4B5D5" strokeWidth="1.5" fill="none"/>
+                <ellipse cx="251" cy="128" rx="10" ry="3" fill="#DDD6E5"/>
+                {/* Steam */}
+                <path d="M245 115 Q247 108 245 102" stroke="#C4B5D5" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+                <path d="M251 115 Q253 108 251 102" stroke="#C4B5D5" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.5"/>
+                {/* Plant */}
+                <rect x="55" y="130" width="10" height="15" rx="2" fill="#8B6A7A"/>
+                <circle cx="60" cy="118" r="14" fill="#16A34A" opacity="0.6"/>
+                <circle cx="52" cy="123" r="10" fill="#16A34A" opacity="0.7"/>
+                <circle cx="68" cy="120" r="11" fill="#22C55E" opacity="0.5"/>
+              </svg>
             </div>
             <h1 className="font-display text-3xl font-bold text-plum-accent mb-3">
               Manage your team with ease.
@@ -116,14 +148,15 @@ export function LoginPage() {
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                   <input
-                    className={`w-full pl-12 pr-4 py-3 rounded-lg border border-border bg-white focus:border-brand-purple focus:ring-2 focus:ring-primary-100 transition-all outline-none text-sm ${errors.email ? 'border-error focus:ring-red-100' : ''}`}
+                    className={`w-full pl-12 pr-4 py-3 rounded-lg border border-border bg-white focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 transition-all outline-none text-sm ${errors.email ? 'border-error focus-visible:ring-red-300' : ''}`}
                     id="email"
                     placeholder="name@company.com"
                     type="email"
+                    aria-describedby={errors.email ? "email-error" : undefined}
                     {...register('email')}
                   />
                 </div>
-                {errors.email && <p className="form-error">{errors.email.message}</p>}
+                {errors.email && <p className="form-error" id="email-error">{errors.email.message}</p>}
               </div>
 
               {/* Password Field */}
@@ -134,14 +167,15 @@ export function LoginPage() {
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                   <input
-                    className={`w-full pl-12 pr-12 py-3 rounded-lg border border-border bg-white focus:border-brand-purple focus:ring-2 focus:ring-primary-100 transition-all outline-none text-sm ${errors.password ? 'border-error focus:ring-red-100' : ''}`}
+                    className={`w-full pl-12 pr-12 py-3 rounded-lg border border-border bg-white focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 transition-all outline-none text-sm ${errors.password ? 'border-error focus-visible:ring-red-300' : ''}`}
                     id="password"
                     placeholder="••••••••"
                     type={showPassword ? 'text' : 'password'}
+                    aria-describedby={errors.password ? "password-error" : undefined}
                     {...register('password')}
                   />
                   <button
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary transition-colors focus-visible:ring-2 focus-visible:ring-primary rounded p-0.5"
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
@@ -149,12 +183,12 @@ export function LoginPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                {errors.password && <p className="form-error">{errors.password.message}</p>}
+                {errors.password && <p className="form-error" id="password-error">{errors.password.message}</p>}
               </div>
 
               {/* Submit Button */}
               <button
-                className="w-full bg-plum text-white font-semibold py-3.5 rounded-lg hover:bg-primary-700 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
+                className="w-full bg-plum text-white font-semibold py-3.5 rounded-lg hover:bg-primary-700 transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[44px]"
                 type="submit"
                 id="login-submit"
                 disabled={isLoading}
@@ -175,7 +209,7 @@ export function LoginPage() {
                   type="button"
                   onClick={() => handleDemoLogin('admin@peopleflow.com', 'Admin@1234')}
                   disabled={isLoading}
-                  className="flex items-center justify-center gap-2 py-3 px-4 border border-border rounded-lg hover:bg-primary-50 text-text-primary hover:text-plum-accent transition-colors font-semibold text-xs disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 py-3 px-4 border border-border rounded-lg hover:bg-primary-50 text-text-primary hover:text-plum-accent transition-colors font-semibold text-xs disabled:opacity-50 min-h-[44px] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                 >
                   <Shield className="w-4 h-4 text-plum-accent" />
                   Demo Admin
@@ -184,7 +218,7 @@ export function LoginPage() {
                   type="button"
                   onClick={() => handleDemoLogin('priyanshu@peopleflow.com', 'Employee@1234')}
                   disabled={isLoading}
-                  className="flex items-center justify-center gap-2 py-3 px-4 border border-border rounded-lg hover:bg-primary-50 text-text-primary hover:text-plum-accent transition-colors font-semibold text-xs disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 py-3 px-4 border border-border rounded-lg hover:bg-primary-50 text-text-primary hover:text-plum-accent transition-colors font-semibold text-xs disabled:opacity-50 min-h-[44px] outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                 >
                   <User className="w-4 h-4 text-plum-accent" />
                   Demo Employee

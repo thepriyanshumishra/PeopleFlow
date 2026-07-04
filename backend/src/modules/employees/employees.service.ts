@@ -2,6 +2,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { getPaginationParams } from '../../shared/utils/response';
 import { logger } from '../../shared/utils/logger';
+import { logActivity } from '../activity/activity.service';
 
 interface UpdateProfileInput {
   phone?: string;
@@ -46,6 +47,20 @@ export const updateOwnProfile = async (
       ...(input.address !== undefined && { address: input.address }),
       ...(input.profilePicture !== undefined && { profilePicture: input.profilePicture }),
     },
+  });
+
+  const emp = await prisma.employee.findUnique({ where: { id: employeeId }, select: { firstName: true, lastName: true, departmentId: true } });
+  const empName = emp ? `${emp.firstName} ${emp.lastName}` : `Employee #${employeeId}`;
+  await logActivity({
+    module: 'employee',
+    action: 'profile_updated',
+    description: `${empName} updated their profile`,
+    actorId: employeeId,
+    actorName: empName,
+    actorRole: 'Employee',
+    employeeId,
+    departmentId: emp?.departmentId ?? undefined,
+    severity: 'info',
   });
 };
 
@@ -136,6 +151,23 @@ export const adminUpdateEmployee = async (
   });
 
   logger.info(`Admin updated employee id=${id}`);
+
+  const updatedEmp = await prisma.employee.findUnique({ where: { id }, select: { firstName: true, lastName: true, departmentId: true } });
+  const updatedName = updatedEmp ? `${updatedEmp.firstName} ${updatedEmp.lastName}` : `Employee #${id}`;
+  const changes = Object.keys(input).filter(k => (input as Record<string, unknown>)[k] !== undefined);
+  await logActivity({
+    module: 'employee',
+    action: 'employee_updated',
+    description: `Admin updated ${updatedName}'s profile (${changes.join(', ')})`,
+    actorRole: 'Admin',
+    targetId: id,
+    targetName: updatedName,
+    employeeId: id,
+    departmentId: updatedEmp?.departmentId ?? undefined,
+    metadata: { fields: changes },
+    severity: 'info',
+    isAdminOnly: false,
+  });
 };
 
 export const softDeleteEmployee = async (id: number): Promise<void> => {
@@ -154,6 +186,19 @@ export const softDeleteEmployee = async (id: number): Promise<void> => {
   ]);
 
   logger.info(`Employee soft deleted: id=${id}`);
+
+  await logActivity({
+    module: 'employee',
+    action: 'employee_deactivated',
+    description: `Employee ${employee.firstName} ${employee.lastName} was deactivated`,
+    actorRole: 'Admin',
+    targetId: id,
+    targetName: `${employee.firstName} ${employee.lastName}`,
+    employeeId: id,
+    metadata: { employeeCode: employee.employeeCode },
+    severity: 'warning',
+    isAdminOnly: true,
+  });
 };
 
 export const updateProfilePicture = async (

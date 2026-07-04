@@ -221,12 +221,47 @@ export function LeavePage() {
               Request Time Off
             </button>
           </div>
-          <div className="flex-1 relative z-10 w-full max-w-xs md:max-w-sm">
-            <img
-              alt="Vacation Illustration"
-              className="w-full h-auto drop-shadow-xl"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBid8cYMY8Kgj2RD4NLLXQRq-hQaTC57dG9etdKkxEyoqqYAqlnmbvGwWvSExiw3hohrQeSUrB3mF3NPJ0RN_3IMlMCpWZi_4lUQjetKH1-oLKGKX3JMJu67v45X1eyihUwLQ9zs0MWNCyp5Rd8kdNpVcpujlEEi0v8lsMJ7rPwWomt7akcYBBtSdVH5kuHTzrj0eNNVBm8-XlAokuM8NtKC_IuiwjVo05k-EgUtFk69kUiwfdCrmTLxlNu_pkjhghTzw1V9O4mivw"
-            />
+          <div className="flex-1 relative z-10 w-full max-w-xs md:max-w-sm flex items-center justify-center">
+            <svg viewBox="0 0 280 220" className="w-full h-auto drop-shadow-xl" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Sky background */}
+              <rect width="280" height="220" rx="20" fill="#F0EBF4"/>
+              {/* Sun */}
+              <circle cx="220" cy="50" r="30" fill="#FBBF24" opacity="0.8"/>
+              <circle cx="220" cy="50" r="20" fill="#FCD34D"/>
+              {/* Clouds */}
+              <ellipse cx="60" cy="60" rx="30" ry="16" fill="white" opacity="0.9"/>
+              <ellipse cx="85" cy="52" rx="22" ry="14" fill="white" opacity="0.9"/>
+              <ellipse cx="40" cy="55" rx="18" ry="12" fill="white" opacity="0.9"/>
+              <ellipse cx="170" cy="80" rx="25" ry="13" fill="white" opacity="0.7"/>
+              <ellipse cx="190" cy="74" rx="18" ry="11" fill="white" opacity="0.7"/>
+              {/* Ground */}
+              <ellipse cx="140" cy="185" rx="120" ry="20" fill="#C4B5D5" opacity="0.4"/>
+              {/* Suitcase body */}
+              <rect x="90" y="130" width="100" height="65" rx="8" fill="#714b67"/>
+              <rect x="90" y="130" width="100" height="65" rx="8" fill="none" stroke="#5a3a54" strokeWidth="2"/>
+              {/* Suitcase handle */}
+              <path d="M115 130 C115 110 165 110 165 130" stroke="#5a3a54" strokeWidth="5" strokeLinecap="round" fill="none"/>
+              {/* Suitcase stripe */}
+              <rect x="90" y="157" width="100" height="8" fill="#5a3a54"/>
+              {/* Suitcase lock */}
+              <rect x="128" y="150" width="24" height="18" rx="3" fill="#FBBF24"/>
+              <circle cx="140" cy="162" r="4" fill="#D97706"/>
+              {/* Decorative stars */}
+              <circle cx="50" cy="100" r="3" fill="#FBBF24"/>
+              <circle cx="230" cy="100" r="3" fill="#FBBF24"/>
+              <circle cx="240" cy="140" r="2" fill="#C4B5D5"/>
+              {/* Palm tree */}
+              <line x1="40" y1="175" x2="45" y2="120" stroke="#6B4F3A" strokeWidth="4" strokeLinecap="round"/>
+              <path d="M45 120 C35 105 20 108 25 95" stroke="#16A34A" strokeWidth="3" fill="none" strokeLinecap="round"/>
+              <path d="M45 120 C55 105 70 108 65 95" stroke="#16A34A" strokeWidth="3" fill="none" strokeLinecap="round"/>
+              <path d="M45 120 C38 112 25 115 30 105" stroke="#16A34A" strokeWidth="3" fill="none" strokeLinecap="round"/>
+              {/* Ticket */}
+              <rect x="185" y="140" width="55" height="35" rx="5" fill="white" stroke="#C4B5D5" strokeWidth="1.5"/>
+              <line x1="200" y1="140" x2="200" y2="175" stroke="#C4B5D5" strokeWidth="1" strokeDasharray="3,3"/>
+              <rect x="205" y="148" width="25" height="4" rx="2" fill="#714b67" opacity="0.5"/>
+              <rect x="205" y="156" width="18" height="3" rx="1.5" fill="#714b67" opacity="0.3"/>
+              <rect x="205" y="163" width="22" height="3" rx="1.5" fill="#714b67" opacity="0.3"/>
+            </svg>
           </div>
         </section>
 

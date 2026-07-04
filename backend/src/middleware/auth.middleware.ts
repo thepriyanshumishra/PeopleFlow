@@ -54,7 +54,6 @@ export const authenticate = async (
       email: user.email,
       roleId: user.roleId,
       roleName: user.role.name,
-      employeeId: user.employee?.id,
     };
 
     // Get employee ID from the user's employee relation

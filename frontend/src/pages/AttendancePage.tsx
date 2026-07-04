@@ -170,6 +170,7 @@ export function AttendancePage() {
           <div className="text-center py-16 bg-background rounded-2xl border border-dashed border-border">
             <Calendar className="w-12 h-12 mx-auto mb-3 text-text-secondary opacity-30" />
             <p className="text-sm text-text-secondary font-semibold">No attendance records for {monthLabel}</p>
+            <p className="text-xs text-text-secondary mt-1 opacity-60">Records will appear here after you check in</p>
           </div>
         ) : (
           <>

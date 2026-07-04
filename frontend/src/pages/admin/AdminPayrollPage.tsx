@@ -1,13 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { CreditCard, Edit2, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
-import { payrollApi } from '@/api/endpoints';
+import { CreditCard, Edit2, ChevronLeft, ChevronRight, Plus, X, Loader2 } from 'lucide-react';
+import { payrollApi, employeesApi } from '@/api/endpoints';
 import toast from 'react-hot-toast';
 
 function EditPayrollModal({ payroll, onClose }: { payroll: any; onClose: () => void }) {
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
   const { register, handleSubmit } = useForm({
     defaultValues: {
       basicSalary: payroll.basicSalary,
@@ -93,12 +99,141 @@ function EditPayrollModal({ payroll, onClose }: { payroll: any; onClose: () => v
   );
 }
 
+function GeneratePayrollModal({ onClose, defaultMonth, defaultYear }: { onClose: () => void; defaultMonth: number; defaultYear: number }) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const { data: empData } = useQuery({
+    queryKey: ['admin-employees-all'],
+    queryFn: () => employeesApi.getAll({ limit: 200 }).then(r => r.data.data),
+  });
+
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      employeeId: '',
+      basicSalary: '',
+      allowances: '0',
+      deductions: '0',
+      tax: '0',
+      month: defaultMonth,
+      year: defaultYear,
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data: any) => payrollApi.adminCreate({
+      employeeId: parseInt(data.employeeId),
+      basicSalary: parseFloat(data.basicSalary),
+      allowances: parseFloat(data.allowances || '0'),
+      deductions: parseFloat(data.deductions || '0'),
+      tax: parseFloat(data.tax || '0'),
+      month: parseInt(data.month),
+      year: parseInt(data.year),
+    }),
+    onSuccess: () => {
+      toast.success('Payroll record generated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['admin-payroll'] });
+      onClose();
+    },
+    onError: (err: any) => toast.error(err?.response?.data?.message || 'Failed to generate payroll'),
+  });
+
+  const employees = (empData as any[]) || [];
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-3xl p-8 max-w-md w-full animate-fade-in shadow-xl relative" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-primary-50 flex items-center justify-center border border-primary-100">
+              <CreditCard className="w-5 h-5 text-plum-accent" />
+            </div>
+            <h2 className="text-lg font-bold">Generate Payroll</h2>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-background transition-colors">
+            <X className="w-4 h-4 text-text-secondary" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit(d => mutation.mutate(d))} className="space-y-4">
+          <div>
+            <label className="form-label" htmlFor="payroll-emp">Employee <span className="text-error">*</span></label>
+            <select
+              id="payroll-emp"
+              className={`w-full py-2.5 px-3 border border-border bg-white rounded-lg outline-none text-sm ${errors.employeeId ? 'border-error' : ''}`}
+              {...register('employeeId', { required: 'Employee is required' })}
+            >
+              <option value="">Select employee…</option>
+              {employees.map((emp: any) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.firstName} {emp.lastName} ({emp.employeeCode})
+                </option>
+              ))}
+            </select>
+            {errors.employeeId && <p className="form-error">{String(errors.employeeId.message)}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="form-label" htmlFor="payroll-month">Month</label>
+              <select id="payroll-month" className="w-full py-2.5 px-3 border border-border bg-white rounded-lg outline-none text-sm" {...register('month')}>
+                {Array.from({ length: 12 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>{new Date(2000, i).toLocaleString('default', { month: 'long' })}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="form-label" htmlFor="payroll-year">Year</label>
+              <input id="payroll-year" type="number" className="form-input" {...register('year')} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs font-semibold">
+            {[
+              { name: 'basicSalary', label: 'Basic Salary *' },
+              { name: 'allowances', label: 'Allowances' },
+              { name: 'deductions', label: 'Deductions' },
+              { name: 'tax', label: 'Tax' },
+            ].map(({ name, label }) => (
+              <div key={name} className="space-y-1">
+                <label className="text-text-secondary block">{label}</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  className={`w-full py-2.5 px-3 border border-border bg-white rounded-lg outline-none text-sm focus:border-brand-purple focus:ring-2 focus:ring-primary-100 transition-all ${name === 'basicSalary' && errors.basicSalary ? 'border-error' : ''}`}
+                  {...register(name as any, name === 'basicSalary' ? { required: 'Required', min: { value: 1, message: 'Must be > 0' } } : {})}
+                />
+                {name === 'basicSalary' && errors.basicSalary && <p className="form-error">{String(errors.basicSalary.message)}</p>}
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-4 pt-2">
+            <button type="button" onClick={onClose} className="w-1/2 py-3 bg-white border border-border hover:bg-background text-text-primary font-bold text-xs rounded-xl transition-all">Cancel</button>
+            <button type="submit" disabled={mutation.isPending} className="w-1/2 py-3 bg-plum text-white font-bold text-xs rounded-xl hover:bg-primary-700 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-60">
+              {mutation.isPending ? <><Loader2 className="w-4 h-4 animate-spin" />Generating…</> : 'Generate Payroll'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export function AdminPayrollPage() {
   const [page, setPage] = useState(1);
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
   const [editPayroll, setEditPayroll] = useState<any>(null);
+  const [showGenerate, setShowGenerate] = useState(false);
 
   const { data: payrollData, isLoading } = useQuery({
     queryKey: ['admin-payroll', month, year, page],
@@ -126,13 +261,24 @@ export function AdminPayrollPage() {
   return (
     <>
       {editPayroll && <EditPayrollModal payroll={editPayroll} onClose={() => setEditPayroll(null)} />}
+      {showGenerate && <GeneratePayrollModal onClose={() => setShowGenerate(false)} defaultMonth={month} defaultYear={year} />}
       <div className="p-6 md:p-8 space-y-12 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
         {/* Header */}
-        <header>
-          <h2 className="font-display text-3xl font-extrabold tracking-tight">
-            Payroll Console <span className="handwritten-text text-3xl ml-1 text-plum-accent italic font-normal">ledgers</span>
-          </h2>
-          <p className="text-text-secondary text-sm">Verify corporate payouts, taxes, allowances, and check status parameters.</p>
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight">
+              Payroll Console <span className="handwritten-text text-3xl ml-1 text-plum-accent italic font-normal">ledgers</span>
+            </h2>
+            <p className="text-text-secondary text-sm mt-1">Verify corporate payouts, taxes, allowances, and check status parameters.</p>
+          </div>
+          <button
+            id="generate-payroll-btn"
+            onClick={() => setShowGenerate(true)}
+            className="bg-plum hover:bg-primary-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" />
+            Generate Payroll
+          </button>
         </header>
 
         {/* Metrics Row */}

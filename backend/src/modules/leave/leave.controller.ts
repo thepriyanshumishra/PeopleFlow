@@ -49,7 +49,7 @@ export const updateLeaveStatus = async (req: AuthenticatedRequest, res: Response
       sendError(res, 'Status must be Approved or Rejected', 400);
       return;
     }
-    await leaveService.updateLeaveStatus(parseInt(req.params.id, 10), req.user.employeeId, status, comment);
+    await leaveService.updateLeaveStatus(parseInt(String(req.params.id), 10), req.user.employeeId, status, comment);
     sendSuccess(res, null, `Leave request ${status.toLowerCase()} successfully`);
   } catch (error) { next(error); }
 };

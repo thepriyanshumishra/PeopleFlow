@@ -2,6 +2,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { getPaginationParams } from '../../shared/utils/response';
 import { logger } from '../../shared/utils/logger';
+import { logActivity } from '../activity/activity.service';
 
 const getStartOfDay = (date: Date): Date => {
   const d = new Date(date);
@@ -70,6 +71,27 @@ export const checkIn = async (employeeId: number) => {
   });
 
   logger.info(`Employee ${employeeId} checked in at ${checkInTime}`);
+
+  // Log to Activity Center
+  const emp = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { firstName: true, lastName: true, departmentId: true },
+  });
+  const empName = emp ? `${emp.firstName} ${emp.lastName}` : `Employee #${employeeId}`;
+  const isLate = record.checkIn && (record.checkIn.getHours() > 9 || (record.checkIn.getHours() === 9 && record.checkIn.getMinutes() > 30));
+  await logActivity({
+    module: 'attendance',
+    action: 'check_in',
+    description: `${empName} checked in at ${checkInTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}${isLate ? ' (late arrival)' : ''}`,
+    actorId: employeeId,
+    actorName: empName,
+    actorRole: 'Employee',
+    employeeId,
+    departmentId: emp?.departmentId ?? undefined,
+    metadata: { checkInTime: checkInTime.toISOString(), isLate: !!isLate },
+    severity: isLate ? 'warning' : 'success',
+  });
+
   return record;
 };
 
@@ -107,6 +129,26 @@ export const checkOut = async (employeeId: number) => {
   });
 
   logger.info(`Employee ${employeeId} checked out. Hours: ${totalHours}`);
+
+  // Log to Activity Center
+  const emp2 = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { firstName: true, lastName: true, departmentId: true },
+  });
+  const empName2 = emp2 ? `${emp2.firstName} ${emp2.lastName}` : `Employee #${employeeId}`;
+  await logActivity({
+    module: 'attendance',
+    action: 'check_out',
+    description: `${empName2} checked out — ${totalHours}h logged (${status})`,
+    actorId: employeeId,
+    actorName: empName2,
+    actorRole: 'Employee',
+    employeeId,
+    departmentId: emp2?.departmentId ?? undefined,
+    metadata: { checkOutTime: checkOutTime.toISOString(), totalHours, status },
+    severity: status === 'Half Day' ? 'warning' : 'info',
+  });
+
   return updated;
 };
 
@@ -255,5 +297,24 @@ export const adminUpdateAttendance = async (
       ...(data.status && { status: data.status }),
       ...(data.notes !== undefined && { notes: data.notes }),
     },
+  });
+
+  const empRec = await prisma.employee.findUnique({
+    where: { id: record.employeeId },
+    select: { firstName: true, lastName: true, departmentId: true },
+  });
+  const empRecName = empRec ? `${empRec.firstName} ${empRec.lastName}` : `Employee #${record.employeeId}`;
+  await logActivity({
+    module: 'attendance',
+    action: 'attendance_edited',
+    description: `Attendance record for ${empRecName} was edited by admin`,
+    actorRole: 'Admin',
+    targetId: id,
+    targetName: empRecName,
+    employeeId: record.employeeId,
+    departmentId: empRec?.departmentId ?? undefined,
+    metadata: { ...data },
+    severity: 'warning',
+    isAdminOnly: true,
   });
 };

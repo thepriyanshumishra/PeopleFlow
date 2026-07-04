@@ -167,9 +167,9 @@ export function LandingPage() {
           <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
             <div className="bg-white p-6 rounded-2xl shadow-xl text-center max-w-md border border-border">
               <header>
-                <h2 className="font-display text-2xl md:text-3xl font-extrabold text-text-primary mb-2 break-words">
+                <h2 className="font-display text-2xl md:text-3xl font-extrabold text-text-primary mb-2 break-words relative">
                   Join <span className="handwritten-text text-[40px] font-normal plum-accent">thousands</span> of users
-                  <span className="absolute top-4 right-4 text-orange-400 handwritten-text text-[24px] rotate-12 flex items-center">
+                  <span className="absolute -top-6 -right-6 text-orange-400 handwritten-text text-[24px] rotate-12 flex items-center">
                     <svg className="mr-1" fill="none" height="24" viewBox="0 0 24 24" width="24">
                       <path d="M5 15c2.5-3 7-5 12-2M15 8l4 5-3 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

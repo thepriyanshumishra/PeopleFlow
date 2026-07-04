@@ -29,7 +29,7 @@ export const getAllPayroll = async (req: AuthenticatedRequest, res: Response, ne
 export const updatePayroll = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (!req.user?.employeeId) { sendError(res, 'Admin employee not found', 404); return; }
-    await payrollService.updatePayroll(parseInt(req.params.id, 10), req.user.employeeId, req.body);
+    await payrollService.updatePayroll(parseInt(String(req.params.id), 10), req.user.employeeId, req.body);
     sendSuccess(res, null, 'Payroll updated successfully');
   } catch (error) { next(error); }
 };

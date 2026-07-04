@@ -19,6 +19,7 @@ import payrollRoutes from './modules/payroll/payroll.routes';
 import notificationRoutes from './modules/notifications/notifications.routes';
 import departmentRoutes from './modules/departments/departments.routes';
 import dashboardRoutes from './modules/departments/dashboard.routes';
+import activityRoutes from './modules/activity/activity.routes';
 
 const app = express();
 
@@ -86,6 +87,7 @@ app.use(API_PREFIX, payrollRoutes);
 app.use(API_PREFIX, notificationRoutes);
 app.use(API_PREFIX, departmentRoutes);
 app.use(API_PREFIX, dashboardRoutes);
+app.use(API_PREFIX, activityRoutes);
 
 // ========================
 // Error Handling

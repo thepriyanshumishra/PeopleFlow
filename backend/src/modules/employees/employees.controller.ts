@@ -67,7 +67,7 @@ export const getEmployeeById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const employee = await employeeService.getEmployeeById(parseInt(req.params.id, 10));
+    const employee = await employeeService.getEmployeeById(parseInt(String(req.params.id), 10));
     sendSuccess(res, employee, 'Employee retrieved');
   } catch (error) {
     next(error);
@@ -80,7 +80,7 @@ export const updateEmployee = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    await employeeService.adminUpdateEmployee(parseInt(req.params.id, 10), req.body);
+    await employeeService.adminUpdateEmployee(parseInt(String(req.params.id), 10), req.body);
     sendSuccess(res, null, 'Employee updated successfully');
   } catch (error) {
     next(error);
@@ -93,7 +93,7 @@ export const deleteEmployee = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    await employeeService.softDeleteEmployee(parseInt(req.params.id, 10));
+    await employeeService.softDeleteEmployee(parseInt(String(req.params.id), 10));
     sendSuccess(res, null, 'Employee deactivated successfully');
   } catch (error) {
     next(error);

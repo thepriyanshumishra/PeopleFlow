@@ -49,9 +49,11 @@ export function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="card p-6 h-48 skeleton" />
-        <div className="card p-6 h-64 skeleton" />
+      <div className="p-6 md:p-8 space-y-6 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
+        <div className="max-w-2xl space-y-6">
+          <div className="card p-6 h-48 skeleton" />
+          <div className="card p-6 h-64 skeleton" />
+        </div>
       </div>
     );
   }
@@ -61,7 +63,12 @@ export function ProfilePage() {
     : user?.email[0].toUpperCase() || 'U';
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-2xl">
+    <div className="p-6 md:p-8 space-y-6 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
+      <header className="mb-6">
+        <h2 className="font-display text-3xl font-extrabold tracking-tight">My Profile <span className="handwritten-text text-3xl ml-1 text-plum-accent italic font-normal">account</span></h2>
+        <p className="text-text-secondary text-sm">Manage your personal information, contact details and security settings.</p>
+      </header>
+      <div className="max-w-2xl space-y-6">
       {/* Profile Header */}
       <div className="card p-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
@@ -213,6 +220,7 @@ export function ProfilePage() {
           </form>
         </div>
       )}
+      </div>
     </div>
   );
 }

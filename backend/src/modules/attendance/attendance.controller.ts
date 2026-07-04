@@ -54,7 +54,7 @@ export const getAllAttendance = async (req: AuthenticatedRequest, res: Response,
 
 export const adminUpdateAttendance = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
-    await attendanceService.adminUpdateAttendance(parseInt(req.params.id, 10), req.body);
+    await attendanceService.adminUpdateAttendance(parseInt(String(req.params.id), 10), req.body);
     sendSuccess(res, null, 'Attendance record updated');
   } catch (error) { next(error); }
 };

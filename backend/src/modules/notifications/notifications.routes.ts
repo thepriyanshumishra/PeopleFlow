@@ -40,7 +40,7 @@ router.put('/notifications/:id/read', authenticate, async (req: AuthenticatedReq
   try {
     if (!req.user?.employeeId) { sendError(res, 'Employee not found', 404); return; }
     await prisma.notification.update({
-      where: { id: parseInt(req.params.id, 10) },
+      where: { id: parseInt(String(req.params.id), 10) },
       data: { isRead: true },
     });
     sendSuccess(res, null, 'Notification marked as read');
@@ -49,7 +49,7 @@ router.put('/notifications/:id/read', authenticate, async (req: AuthenticatedReq
 
 router.delete('/notifications/:id', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    await prisma.notification.delete({ where: { id: parseInt(req.params.id, 10) } });
+    await prisma.notification.delete({ where: { id: parseInt(String(req.params.id), 10) } });
     sendSuccess(res, null, 'Notification deleted');
   } catch (error) { next(error); }
 });

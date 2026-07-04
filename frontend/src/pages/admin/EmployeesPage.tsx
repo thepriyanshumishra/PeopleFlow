@@ -1,11 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Search, Users, Eye, Trash2, ChevronLeft, ChevronRight, UserCheck, UserX, X } from 'lucide-react';
+import { Search, Users, Eye, Trash2, ChevronLeft, ChevronRight, UserCheck, UserX, X, Loader2, AlertTriangle } from 'lucide-react';
 import { employeesApi, departmentsApi } from '@/api/endpoints';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 
 function EmployeeDetailModal({ employee, onClose }: { employee: any; onClose: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white rounded-3xl p-8 max-w-lg w-full animate-fade-in shadow-xl relative" onClick={e => e.stopPropagation()}>
@@ -49,12 +55,79 @@ function EmployeeDetailModal({ employee, onClose }: { employee: any; onClose: ()
   );
 }
 
+function DeactivateConfirmModal({
+  employee,
+  onClose,
+  onConfirm,
+  loading,
+}: {
+  employee: any;
+  onClose: () => void;
+  onConfirm: () => void;
+  loading: boolean;
+}) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-3xl p-8 max-w-sm w-full animate-fade-in shadow-xl text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-5 border border-red-100">
+          <AlertTriangle className="w-6 h-6 text-error" />
+        </div>
+        <h2 className="text-lg font-bold mb-2">Deactivate Employee?</h2>
+        <p className="text-sm text-text-secondary mb-1">
+          You are about to deactivate{' '}
+          <strong className="text-text-primary">
+            {employee.firstName} {employee.lastName}
+          </strong>.
+        </p>
+        <p className="text-xs text-text-secondary mb-6">
+          This will remove their access to the system. This action cannot be undone.
+        </p>
+        <div className="flex gap-4">
+          <button
+            onClick={onClose}
+            className="w-1/2 py-3 bg-white border border-border hover:bg-background text-text-primary font-bold text-xs rounded-xl transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="w-1/2 py-3 bg-error text-white font-bold text-xs rounded-xl hover:bg-red-700 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Deactivating…
+              </>
+            ) : (
+              'Deactivate'
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function EmployeesPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [deactivateEmployee, setDeactivateEmployee] = useState<any>(null);
 
   const { data: empData, isLoading } = useQuery({
     queryKey: ['admin-employees', search, deptFilter, page],
@@ -71,6 +144,7 @@ export function EmployeesPage() {
     onSuccess: () => {
       toast.success('Employee deactivated successfully');
       queryClient.invalidateQueries({ queryKey: ['admin-employees'] });
+      setDeactivateEmployee(null);
     },
     onError: (err: any) => toast.error(err?.response?.data?.message || 'Failed'),
   });
@@ -80,15 +154,21 @@ export function EmployeesPage() {
   const departments = (deptData as any[]) || [];
 
   const handleDelete = (emp: any) => {
-    if (window.confirm(`Deactivate ${emp.firstName} ${emp.lastName}? This cannot be undone.`)) {
-      deleteMutation.mutate(emp.id);
-    }
+    setDeactivateEmployee(emp);
   };
 
   return (
     <>
       {selectedEmployee && (
         <EmployeeDetailModal employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} />
+      )}
+      {deactivateEmployee && (
+        <DeactivateConfirmModal
+          employee={deactivateEmployee}
+          onClose={() => setDeactivateEmployee(null)}
+          onConfirm={() => deleteMutation.mutate(deactivateEmployee.id)}
+          loading={deleteMutation.isPending}
+        />
       )}
       <div className="p-6 md:p-8 space-y-12 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
         {/* Header */}

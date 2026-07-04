@@ -11,6 +11,7 @@ export function AdminAttendancePage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
 
   const { data: attendanceData, isLoading } = useQuery({
     queryKey: ['admin-attendance', month, year, statusFilter, page],
@@ -19,6 +20,12 @@ export function AdminAttendancePage() {
 
   const records = attendanceData?.data || [];
   const pagination = attendanceData?.pagination;
+
+  const filteredRecords = search
+    ? records.filter((r: any) =>
+        `${r.employee.firstName} ${r.employee.lastName}`.toLowerCase().includes(search.toLowerCase())
+      )
+    : records;
 
   const prevMonth = () => {
     if (month === 1) { setMonth(12); setYear(y => y - 1); }
@@ -53,25 +60,46 @@ export function AdminAttendancePage() {
           </h2>
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5">
-              <button onClick={prevMonth} className="p-2 border border-border hover:bg-background rounded-lg">
+              <button
+                type="button"
+                onClick={prevMonth}
+                aria-label="Previous Month"
+                className="p-2 border border-border hover:bg-background rounded-lg min-h-[36px] min-w-[36px] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+              >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={nextMonth} className="p-2 border border-border hover:bg-background rounded-lg">
+              <button
+                type="button"
+                onClick={nextMonth}
+                aria-label="Next Month"
+                className="p-2 border border-border hover:bg-background rounded-lg min-h-[36px] min-w-[36px] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+              >
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             <select
-              className="py-2 px-4 border border-border bg-white rounded-lg text-xs outline-none"
+              aria-label="Filter by Attendance Status"
+              className="py-2 px-4 border border-border bg-white rounded-lg text-xs outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
             >
-              <option value="">All Status</option>
+              <option value="">All Statuses</option>
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
               <option value="Late">Late</option>
               <option value="Half Day">Half Day</option>
               <option value="Leave">On Leave</option>
             </select>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-secondary pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search employee…"
+                value={search}
+                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                className="pl-9 pr-4 py-2 border border-border bg-white rounded-lg text-xs outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:border-primary w-44"
+              />
+            </div>
           </div>
         </div>
 
@@ -79,10 +107,12 @@ export function AdminAttendancePage() {
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => <div key={i} className="h-14 skeleton rounded-xl animate-pulse bg-background border border-border" />)}
           </div>
-        ) : records.length === 0 ? (
+        ) : filteredRecords.length === 0 ? (
           <div className="text-center py-16 bg-background rounded-2xl border border-dashed border-border">
             <Clock className="w-12 h-12 mx-auto mb-3 text-text-secondary opacity-30" />
-            <p className="text-sm text-text-secondary font-semibold">No attendance records for {monthLabel}</p>
+            <p className="text-sm text-text-secondary font-semibold">
+              No records yet{search ? ` matching "${search}"` : ` for ${monthLabel}`}
+            </p>
           </div>
         ) : (
           <>
@@ -99,7 +129,7 @@ export function AdminAttendancePage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border bg-white font-medium text-text-primary">
-                  {records.map((r: any) => {
+                  {filteredRecords.map((r: any) => {
                     const empInitials = `${r.employee.firstName[0]}${r.employee.lastName[0]}`;
                     return (
                       <tr key={r.id} className="hover:bg-primary-50/10 transition-colors">
@@ -134,9 +164,10 @@ export function AdminAttendancePage() {
                 </p>
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40"
+                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40 min-h-[36px] min-w-[36px] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -144,9 +175,10 @@ export function AdminAttendancePage() {
                     {page} / {pagination.totalPages}
                   </span>
                   <button
+                    type="button"
                     onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
                     disabled={page === pagination.totalPages}
-                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40"
+                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40 min-h-[36px] min-w-[36px] flex items-center justify-center transition-all focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>

@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from '../../middleware/auth.middleware';
 import * as authService from './auth.service';
 import { registerSchema, loginSchema, changePasswordSchema, refreshTokenSchema } from './auth.schema';
 import { sendSuccess, sendCreated, sendError } from '../../shared/utils/response';
+import { logActivity } from '../activity/activity.service';
 
 export const register = async (
   req: AuthenticatedRequest,
@@ -30,6 +31,23 @@ export const login = async (
   try {
     const { body } = loginSchema.parse({ body: req.body });
     const result = await authService.loginUser(body);
+
+    // Log login activity
+    await logActivity({
+      module: 'auth',
+      action: 'user_login',
+      description: `${result.user.email} signed in (${result.user.role})`,
+      actorId: result.user.employee?.id,
+      actorName: result.user.employee
+        ? `${(result.user.employee as { firstName?: string; lastName?: string }).firstName ?? ''} ${(result.user.employee as { firstName?: string; lastName?: string }).lastName ?? ''}`.trim() || result.user.email
+        : result.user.email,
+      actorRole: result.user.role,
+      employeeId: result.user.employee?.id,
+      metadata: { email: result.user.email, role: result.user.role },
+      severity: 'info',
+      isAdminOnly: true,
+    });
+
     sendSuccess(res, {
       accessToken: result.tokens.accessToken,
       refreshToken: result.tokens.refreshToken,
@@ -77,6 +95,19 @@ export const changePassword = async (
     if (!req.user) { sendError(res, 'Unauthorized', 401); return; }
     const { body } = changePasswordSchema.parse({ body: req.body });
     await authService.changePassword(req.user.id, body);
+
+    await logActivity({
+      module: 'auth',
+      action: 'password_changed',
+      description: `${req.user.email} changed their password`,
+      actorId: req.user.employeeId ?? undefined,
+      actorName: req.user.email,
+      actorRole: req.user.roleName,
+      employeeId: req.user.employeeId ?? undefined,
+      severity: 'warning',
+      isAdminOnly: true,
+    });
+
     sendSuccess(res, null, 'Password changed successfully');
   } catch (error) {
     next(error);

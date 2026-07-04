@@ -2,6 +2,7 @@ import { prisma } from '../../config/database';
 import { AppError } from '../../middleware/error.middleware';
 import { getPaginationParams } from '../../shared/utils/response';
 import { logger } from '../../shared/utils/logger';
+import { logActivity } from '../activity/activity.service';
 
 export const getMyPayroll = async (
   employeeId: number,
@@ -136,6 +137,26 @@ export const updatePayroll = async (
   });
 
   logger.info(`Payroll ${id} updated by admin ${adminEmployeeId}`);
+
+  const payEmp = await prisma.employee.findUnique({ where: { id: payroll.employeeId }, select: { firstName: true, lastName: true, departmentId: true } });
+  const payEmpName = payEmp ? `${payEmp.firstName} ${payEmp.lastName}` : `Employee #${payroll.employeeId}`;
+  const isReleased = data.paymentStatus === 'Paid';
+  await logActivity({
+    module: 'payroll',
+    action: isReleased ? 'payroll_released' : 'payroll_updated',
+    description: isReleased
+      ? `Salary released for ${payEmpName} — ₹${netSalary.toLocaleString('en-IN')}`
+      : `Payroll updated for ${payEmpName} — net ₹${netSalary.toLocaleString('en-IN')}`,
+    actorId: adminEmployeeId,
+    actorRole: 'Admin',
+    targetId: id,
+    targetName: payEmpName,
+    employeeId: payroll.employeeId,
+    departmentId: payEmp?.departmentId ?? undefined,
+    metadata: { netSalary, basicSalary, allowances, deductions, tax, paymentStatus: data.paymentStatus },
+    severity: isReleased ? 'success' : 'info',
+    isAdminOnly: false,
+  });
 };
 
 export const createPayroll = async (
@@ -159,7 +180,7 @@ export const createPayroll = async (
   const payPeriod = new Date(data.payPeriod);
   payPeriod.setDate(1);
 
-  return prisma.payroll.create({
+  const payroll = await prisma.payroll.create({
     data: {
       employeeId: data.employeeId,
       basicSalary: data.basicSalary,
@@ -171,4 +192,23 @@ export const createPayroll = async (
       updatedById: adminEmployeeId,
     },
   });
+
+  const newPayEmp = await prisma.employee.findUnique({ where: { id: data.employeeId }, select: { firstName: true, lastName: true, departmentId: true } });
+  const newPayEmpName = newPayEmp ? `${newPayEmp.firstName} ${newPayEmp.lastName}` : `Employee #${data.employeeId}`;
+  await logActivity({
+    module: 'payroll',
+    action: 'payroll_generated',
+    description: `Payroll generated for ${newPayEmpName} — ₹${netSalary.toLocaleString('en-IN')} for ${payPeriod.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}`,
+    actorId: adminEmployeeId,
+    actorRole: 'Admin',
+    targetId: payroll.id,
+    targetName: newPayEmpName,
+    employeeId: data.employeeId,
+    departmentId: newPayEmp?.departmentId ?? undefined,
+    metadata: { netSalary, basicSalary: data.basicSalary, allowances, deductions, tax, payPeriod: payPeriod.toISOString() },
+    severity: 'success',
+    isAdminOnly: false,
+  });
+
+  return payroll;
 };

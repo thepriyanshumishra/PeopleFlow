@@ -3,6 +3,7 @@ import { AppError } from '../../middleware/error.middleware';
 import { getPaginationParams } from '../../shared/utils/response';
 import { analyzeLeaveRequest } from '../ai/ai.service';
 import { logger } from '../../shared/utils/logger';
+import { logActivity } from '../activity/activity.service';
 
 interface ApplyLeaveInput {
   leaveTypeId: number;
@@ -99,6 +100,44 @@ export const applyLeave = async (employeeId: number, input: ApplyLeaveInput) => 
   });
 
   logger.info(`Leave applied: employee=${employeeId}, type=${leaveType.name}, days=${totalDays}`);
+
+  // Log to Activity Center
+  const emp = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { firstName: true, lastName: true, departmentId: true },
+  });
+  const empName = emp ? `${emp.firstName} ${emp.lastName}` : `Employee #${employeeId}`;
+  await logActivity({
+    module: 'leave',
+    action: 'leave_requested',
+    description: `${empName} submitted a ${leaveType.name} request for ${totalDays} day(s)`,
+    actorId: employeeId,
+    actorName: empName,
+    actorRole: 'Employee',
+    targetId: leaveRequest.id,
+    targetName: `${leaveType.name} (${totalDays}d)`,
+    employeeId,
+    departmentId: emp?.departmentId ?? undefined,
+    metadata: { leaveType: leaveType.name, totalDays, startDate: input.startDate, endDate: input.endDate, aiPriority: aiAnalysis?.priority },
+    severity: aiAnalysis?.priority === 'High' ? 'warning' : 'info',
+  });
+
+  // Log AI analysis activity if analysis ran
+  if (aiAnalysis?.summary) {
+    await logActivity({
+      module: 'ai',
+      action: 'ai_leave_analyzed',
+      description: `AI classified ${empName}'s leave as ${aiAnalysis.suggestedType ?? leaveType.name} with ${aiAnalysis.priority ?? 'Medium'} priority`,
+      actorName: 'Gemini AI',
+      actorRole: 'System',
+      targetId: leaveRequest.id,
+      employeeId,
+      departmentId: emp?.departmentId ?? undefined,
+      metadata: { summary: aiAnalysis.summary, recommendation: aiAnalysis.recommendation },
+      severity: 'ai',
+    });
+  }
+
   return leaveRequest;
 };
 
@@ -254,6 +293,34 @@ export const updateLeaveStatus = async (
   });
 
   logger.info(`Leave ${leaveId} ${status} by admin employee ${adminEmployeeId}`);
+
+  // Log to Activity Center
+  const actionKey = status === 'Approved' ? 'leave_approved' : 'leave_rejected';
+  const adminEmp = await prisma.employee.findUnique({
+    where: { id: adminEmployeeId },
+    select: { firstName: true, lastName: true },
+  });
+  const adminName = adminEmp ? `${adminEmp.firstName} ${adminEmp.lastName}` : 'Admin';
+  const empEmp = await prisma.employee.findUnique({
+    where: { id: leaveRequest.employeeId },
+    select: { firstName: true, lastName: true, departmentId: true },
+  });
+  const targetEmpName = empEmp ? `${empEmp.firstName} ${empEmp.lastName}` : `Employee #${leaveRequest.employeeId}`;
+  await logActivity({
+    module: 'leave',
+    action: actionKey,
+    description: `${adminName} ${status === 'Approved' ? 'approved' : 'rejected'} ${targetEmpName}'s ${leaveRequest.leaveType.name} request`,
+    actorId: adminEmployeeId,
+    actorName: adminName,
+    actorRole: 'Admin',
+    targetId: leaveId,
+    targetName: `${targetEmpName} - ${leaveRequest.leaveType.name}`,
+    employeeId: leaveRequest.employeeId,
+    departmentId: empEmp?.departmentId ?? undefined,
+    metadata: { status, comment, leaveType: leaveRequest.leaveType.name, totalDays: leaveRequest.totalDays },
+    severity: status === 'Approved' ? 'success' : 'error',
+    isAdminOnly: false,
+  });
 };
 
 export const getLeaveTypes = async () => {

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { DollarSign, TrendingUp, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import { payrollApi } from '@/api/endpoints';
+import toast from 'react-hot-toast';
 
 function PayslipCard({ payroll }: { payroll: any }) {
   const isPaid = payroll.paymentStatus === 'Paid';
@@ -44,6 +45,14 @@ function PayslipCard({ payroll }: { payroll: any }) {
           <p className="text-[10px] text-text-secondary uppercase mb-1">Estimated Tax</p>
           <p className="text-sm font-bold text-orange-500">-₹{payroll.tax.toLocaleString('en-IN')}</p>
         </div>
+      </div>
+      <div className="flex justify-end mt-3">
+        <button
+          onClick={(e) => { e.stopPropagation(); toast('Payslip download available in production', { icon: '📄' }); }}
+          className="flex items-center gap-1.5 text-[10px] font-bold text-text-secondary hover:text-plum-accent transition-colors"
+        >
+          <Download className="w-3.5 h-3.5" /> Download PDF
+        </button>
       </div>
     </div>
   );

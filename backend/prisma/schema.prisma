@@ -253,3 +253,38 @@ model Notification {
   @@index([isRead])
   @@map("notifications")
 }
+
+// ========================
+// ACTIVITY LOG
+// ========================
+model ActivityLog {
+  id           Int       @id @default(autoincrement())
+  // Module that generated this event
+  module       String    // attendance | leave | payroll | employee | department | auth | system | ai
+  // Machine-readable action key
+  action       String    // check_in | check_out | leave_requested | leave_approved | payroll_generated | …
+  // Human-readable sentence for display
+  description  String
+  // Actor (who performed the action) — denormalized for performance
+  actorId      Int?      @map("actor_id")
+  actorName    String?   @map("actor_name")
+  actorRole    String?   @map("actor_role")    // Admin | Employee
+  // Target resource (what was affected)
+  targetId     Int?      @map("target_id")
+  targetName   String?   @map("target_name")
+  // Scoping: which employee this activity belongs to (for employee view)
+  employeeId   Int?      @map("employee_id")
+  departmentId Int?      @map("department_id")
+  // Extra structured data (leave type, hours, salary amount, etc.)
+  metadata     Json?
+  // Visual properties
+  severity     String    @default("info")  // info | success | warning | error | ai
+  isAdminOnly  Boolean   @default(false)   @map("is_admin_only")
+  createdAt    DateTime  @default(now())   @map("created_at")
+
+  @@index([module, createdAt(sort: Desc)])
+  @@index([employeeId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@index([action])
+  @@map("activity_logs")
+}
