@@ -35,24 +35,33 @@ export function AdminAttendancePage() {
   const monthLabel = new Date(year, month - 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="card p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <h2 className="text-base font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" />
-            Attendance — {monthLabel}
+    <div className="p-6 md:p-8 space-y-12 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
+      {/* Header */}
+      <header>
+        <h2 className="font-display text-3xl font-extrabold tracking-tight">
+          Attendance Registry <span className="handwritten-text text-3xl ml-1 text-plum-accent italic font-normal">audits</span>
+        </h2>
+        <p className="text-text-secondary text-sm">Review employee time-card logs and monthly check-ins.</p>
+      </header>
+
+      {/* Board */}
+      <div className="bg-white border border-border rounded-3xl p-8 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <h2 className="text-base font-bold flex items-center gap-2">
+            <Clock className="w-5 h-5 text-plum-accent" />
+            Timecards for <strong className="text-plum-accent">{monthLabel}</strong>
           </h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1">
-              <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-background border border-border">
-                <ChevronLeft className="w-4 h-4 text-text-secondary" />
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <button onClick={prevMonth} className="p-2 border border-border hover:bg-background rounded-lg">
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-background border border-border">
-                <ChevronRight className="w-4 h-4 text-text-secondary" />
+              <button onClick={nextMonth} className="p-2 border border-border hover:bg-background rounded-lg">
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             <select
-              className="form-input w-auto text-sm py-2"
+              className="py-2 px-4 border border-border bg-white rounded-lg text-xs outline-none"
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
             >
@@ -67,62 +76,78 @@ export function AdminAttendancePage() {
         </div>
 
         {isLoading ? (
-          <div className="space-y-2">
-            {[...Array(8)].map((_, i) => <div key={i} className="h-12 skeleton rounded-lg" />)}
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => <div key={i} className="h-14 skeleton rounded-xl animate-pulse bg-background border border-border" />)}
           </div>
         ) : records.length === 0 ? (
-          <div className="text-center py-14">
-            <Clock className="w-12 h-12 mx-auto mb-3 text-border" />
-            <p className="text-text-secondary">No attendance records for {monthLabel}</p>
+          <div className="text-center py-16 bg-background rounded-2xl border border-dashed border-border">
+            <Clock className="w-12 h-12 mx-auto mb-3 text-text-secondary opacity-30" />
+            <p className="text-sm text-text-secondary font-semibold">No attendance records for {monthLabel}</p>
           </div>
         ) : (
           <>
-            <div className="table-container rounded-xl border border-border">
-              <table className="table">
-                <thead>
+            <div className="overflow-x-auto rounded-2xl border border-border">
+              <table className="min-w-full divide-y divide-border text-left text-sm">
+                <thead className="bg-background font-bold text-text-secondary text-xs uppercase tracking-wider">
                   <tr>
-                    <th>Employee</th>
-                    <th>Date</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Hours</th>
-                    <th>Status</th>
+                    <th className="px-6 py-4">Employee</th>
+                    <th className="px-6 py-4">Date</th>
+                    <th className="px-6 py-4">Check In</th>
+                    <th className="px-6 py-4">Check Out</th>
+                    <th className="px-6 py-4">Hours</th>
+                    <th className="px-6 py-4">Status</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {records.map((r: any) => (
-                    <tr key={r.id}>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
-                            {r.employee.firstName[0]}{r.employee.lastName[0]}
+                <tbody className="divide-y divide-border bg-white font-medium text-text-primary">
+                  {records.map((r: any) => {
+                    const empInitials = `${r.employee.firstName[0]}${r.employee.lastName[0]}`;
+                    return (
+                      <tr key={r.id} className="hover:bg-primary-50/10 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-plum flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                              {empInitials}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-bold truncate">{r.employee.firstName} {r.employee.lastName}</p>
+                              <p className="text-[10px] text-text-secondary font-semibold">{r.employee.department?.name || 'No Dept'}</p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-medium truncate">{r.employee.firstName} {r.employee.lastName}</p>
-                            <p className="text-[10px] text-text-secondary">{r.employee.department?.name}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="font-medium text-sm">{format(new Date(r.attendanceDate), 'EEE, d MMM')}</td>
-                      <td className="text-sm">{r.checkIn ? format(new Date(r.checkIn), 'hh:mm a') : '—'}</td>
-                      <td className="text-sm">{r.checkOut ? format(new Date(r.checkOut), 'hh:mm a') : '—'}</td>
-                      <td className="text-sm">{r.totalHours ? `${r.totalHours}h` : '—'}</td>
-                      <td>{getAttendanceStatusBadge(r.status)}</td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 font-bold">{format(new Date(r.attendanceDate), 'EEE, d MMM yyyy')}</td>
+                        <td className="px-6 py-4">{r.checkIn ? format(new Date(r.checkIn), 'hh:mm a') : '—'}</td>
+                        <td className="px-6 py-4">{r.checkOut ? format(new Date(r.checkOut), 'hh:mm a') : '—'}</td>
+                        <td className="px-6 py-4">{r.totalHours ? `${r.totalHours} hrs` : '—'}</td>
+                        <td className="px-6 py-4">{getAttendanceStatusBadge(r.status)}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
+            {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 text-sm">
-                <p className="text-text-secondary">{pagination.total} records</p>
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/40 text-xs">
+                <p className="text-text-secondary font-semibold">
+                  Showing {records.length} of {pagination.total} records
+                </p>
                 <div className="flex gap-2">
-                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-ghost btn-sm border border-border disabled:opacity-40">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40"
+                  >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="px-3 py-1.5 font-medium">{page} / {pagination.totalPages}</span>
-                  <button onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))} disabled={page === pagination.totalPages} className="btn-ghost btn-sm border border-border disabled:opacity-40">
+                  <span className="px-3 py-2 text-text-primary font-bold">
+                    {page} / {pagination.totalPages}
+                  </span>
+                  <button
+                    onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+                    disabled={page === pagination.totalPages}
+                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40"
+                  >
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

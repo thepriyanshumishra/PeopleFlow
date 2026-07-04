@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { Plus, CalendarDays, ChevronLeft, ChevronRight, X, Sparkles, Info } from 'lucide-react';
+import { Plus, CalendarDays, ChevronLeft, ChevronRight, X, Sparkles, Info, Calendar } from 'lucide-react';
 import { leaveApi } from '@/api/endpoints';
 import { getLeaveStatusBadge, getPriorityBadge } from '@/components/ui/Badge';
 import toast from 'react-hot-toast';
@@ -52,44 +52,46 @@ function ApplyLeaveModal({ onClose }: { onClose: () => void }) {
 
   if (mutation.isSuccess && aiPreview) {
     return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content p-6 animate-fade-in" onClick={e => e.stopPropagation()}>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              AI Analysis
+      <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
+        <div className="bg-white rounded-3xl p-8 max-w-md w-full animate-fade-in shadow-xl relative" onClick={e => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-bold flex items-center gap-2 text-plum-accent">
+              <Sparkles className="w-5 h-5 text-plum-accent" />
+              AI Leave Analysis
             </h2>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-background">
+            <button onClick={onClose} className="p-1.5 rounded-full hover:bg-background">
               <X className="w-4 h-4 text-text-secondary" />
             </button>
           </div>
-          <div className="space-y-4">
-            <div className="p-4 bg-primary-50 rounded-xl">
-              <p className="text-xs font-semibold text-primary uppercase mb-1.5">Summary</p>
-              <p className="text-sm text-text-primary">{aiPreview.summary || 'Leave request submitted.'}</p>
+          <div className="space-y-5">
+            <div className="p-5 bg-primary-50 rounded-2xl border border-primary-100">
+              <p className="text-[10px] font-bold text-plum-accent uppercase tracking-wider mb-1.5">Summary</p>
+              <p className="text-sm text-text-primary leading-relaxed">{aiPreview.summary || 'Leave request submitted.'}</p>
             </div>
             {aiPreview.suggestedType && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 bg-background rounded-xl">
-                  <p className="text-xs text-text-secondary mb-1">Suggested Type</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-background rounded-2xl border border-border/50">
+                  <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider mb-1">Suggested</p>
                   <p className="text-sm font-semibold text-text-primary">{aiPreview.suggestedType}</p>
                 </div>
-                <div className="p-3 bg-background rounded-xl">
-                  <p className="text-xs text-text-secondary mb-1">AI Priority</p>
+                <div className="p-4 bg-background rounded-2xl border border-border/50">
+                  <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider mb-1">Priority</p>
                   <div>{getPriorityBadge(aiPreview.priority)}</div>
                 </div>
               </div>
             )}
             {aiPreview.recommendation && (
-              <div className="p-4 bg-yellow-50 rounded-xl flex gap-2">
+              <div className="p-4 bg-yellow-50 rounded-2xl border border-yellow-100 flex gap-2">
                 <Info className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-yellow-800">{aiPreview.recommendation}</p>
+                <p className="text-xs text-yellow-800 leading-relaxed">{aiPreview.recommendation}</p>
               </div>
             )}
-            <p className="text-sm text-center text-text-secondary">
+            <p className="text-xs text-center text-text-secondary">
               Your leave request is submitted and pending admin approval.
             </p>
-            <button onClick={onClose} className="btn-primary w-full">Done</button>
+            <button onClick={onClose} className="w-full py-3 bg-plum text-white font-bold text-xs rounded-xl hover:bg-primary-700 transition-colors shadow-sm">
+              Done
+            </button>
           </div>
         </div>
       </div>
@@ -97,46 +99,52 @@ function ApplyLeaveModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content p-6 animate-fade-in" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold">Apply for Leave</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-background">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-3xl p-8 max-w-lg w-full animate-fade-in shadow-xl relative" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-bold">Apply for Leave</h2>
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-background">
             <X className="w-4 h-4 text-text-secondary" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-4">
+        <form onSubmit={handleSubmit((d) => mutation.mutate(d))} className="space-y-5">
           <div>
-            <label className="form-label">Leave Type <span className="text-error">*</span></label>
-            <select className="form-input" {...register('leaveTypeId', { required: true })}>
+            <label className="form-label block" htmlFor="leaveType">Leave Type <span className="text-error">*</span></label>
+            <select
+              id="leaveType"
+              className="w-full py-3 px-4 border border-border bg-white rounded-lg outline-none text-sm"
+              {...register('leaveTypeId', { required: true })}
+            >
               <option value="">Select leave type</option>
               {leaveTypes.map((lt: any) => (
                 <option key={lt.id} value={lt.id}>{lt.name}</option>
               ))}
             </select>
             {selectedBalance && (
-              <p className="text-xs text-text-secondary mt-1">
-                Balance: <strong className="text-primary">{selectedBalance.remainingDays} days</strong> remaining
+              <p className="text-xs text-text-secondary mt-1.5">
+                Balance: <strong className="text-plum-accent">{selectedBalance.remainingDays} days</strong> remaining
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="form-label">From <span className="text-error">*</span></label>
+              <label className="form-label block" htmlFor="startDate">From <span className="text-error">*</span></label>
               <input
                 type="date"
-                className="form-input"
+                id="startDate"
+                className="w-full py-3 px-4 border border-border bg-white rounded-lg outline-none text-sm"
                 min={format(new Date(), 'yyyy-MM-dd')}
                 {...register('startDate', { required: true })}
               />
             </div>
             <div>
-              <label className="form-label">To <span className="text-error">*</span></label>
+              <label className="form-label block" htmlFor="endDate">To <span className="text-error">*</span></label>
               <input
                 type="date"
-                className="form-input"
+                id="endDate"
+                className="w-full py-3 px-4 border border-border bg-white rounded-lg outline-none text-sm"
                 min={format(new Date(), 'yyyy-MM-dd')}
                 {...register('endDate', { required: true })}
               />
@@ -144,30 +152,27 @@ function ApplyLeaveModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div>
-            <label className="form-label">Reason <span className="text-error">*</span></label>
+            <label className="form-label block" htmlFor="reason">Reason <span className="text-error">*</span></label>
             <textarea
-              className={`form-input resize-none ${errors.reason ? 'form-input-error' : ''}`}
+              id="reason"
+              className={`w-full py-3 px-4 border border-border bg-white rounded-lg outline-none text-sm resize-none ${errors.reason ? 'border-error' : ''}`}
               rows={4}
               placeholder="Describe your reason for leave… AI will analyze and classify it."
               {...register('reason', { required: 'Reason is required', minLength: { value: 10, message: 'At least 10 characters' } })}
             />
-            {errors.reason && <p className="form-error">{String(errors.reason.message)}</p>}
-            <p className="text-xs text-text-secondary mt-1 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              AI will analyze your reason and provide recommendations
+            {errors.reason && <p className="text-xs text-red-600 mt-1">{String(errors.reason.message)}</p>}
+            <p className="text-xs text-text-secondary mt-1.5 flex items-center gap-1.5 font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-plum-accent" />
+              AI will analyze your reason and determine priority.
             </p>
           </div>
 
-          <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="btn-ghost flex-1 border border-border">
+          <div className="flex gap-4 pt-2">
+            <button type="button" onClick={onClose} className="w-1/2 py-3 bg-white border border-border hover:bg-background text-text-primary font-bold text-xs rounded-xl transition-all">
               Cancel
             </button>
-            <button type="submit" disabled={mutation.isPending} className="btn-primary flex-1">
-              {mutation.isPending ? (
-                <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Analyzing…</>
-              ) : (
-                <><Sparkles className="w-4 h-4" />Submit with AI</>
-              )}
+            <button type="submit" disabled={mutation.isPending} className="w-1/2 py-3 bg-plum text-white font-bold text-xs rounded-xl hover:bg-primary-700 transition-all flex items-center justify-center gap-2">
+              {mutation.isPending ? 'Analyzing…' : 'Submit with AI'}
             </button>
           </div>
         </form>
@@ -191,11 +196,6 @@ export function LeavePage() {
     queryFn: () => leaveApi.getMyLeaves({ status: filterStatus || undefined, page, limit: 10 }).then(r => r.data),
   });
 
-  const { data: leaveTypesData } = useQuery({
-    queryKey: ['leave-types'],
-    queryFn: () => leaveApi.getTypes().then(r => r.data.data),
-  });
-
   const balances = (balanceData as any[]) || [];
   const leaves = leavesData?.data || [];
   const pagination = leavesData?.pagination;
@@ -203,25 +203,51 @@ export function LeavePage() {
   return (
     <>
       {showModal && <ApplyLeaveModal onClose={() => setShowModal(false)} />}
-      <div className="space-y-6 animate-fade-in">
-        {/* Leave Balances */}
-        <div className="card p-6">
-          <h2 className="text-base font-semibold mb-4">Leave Balance ({new Date().getFullYear()})</h2>
-          <div className="grid sm:grid-cols-3 gap-3">
+      <div className="p-6 md:p-8 space-y-12 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
+        {/* Welcoming Hero Header */}
+        <section className="relative bg-[#F4F1FA] rounded-3xl p-8 md:p-12 overflow-hidden flex flex-col md:flex-row items-center gap-8 border border-primary-100">
+          <div className="flex-1 z-10 space-y-6">
+            <h2 className="font-display text-4xl font-extrabold tracking-tight text-plum-accent leading-tight">
+              Ready for your <br />
+              next break?
+            </h2>
+            <p className="text-text-secondary text-sm max-w-md">
+              You've earned some downtime. Check your balances below and plan your next adventure.
+            </p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-plum hover:bg-primary-700 text-white font-bold text-xs px-8 py-3.5 rounded-xl hover:shadow-lg transition-all active:scale-95"
+            >
+              Request Time Off
+            </button>
+          </div>
+          <div className="flex-1 relative z-10 w-full max-w-xs md:max-w-sm">
+            <img
+              alt="Vacation Illustration"
+              className="w-full h-auto drop-shadow-xl"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBid8cYMY8Kgj2RD4NLLXQRq-hQaTC57dG9etdKkxEyoqqYAqlnmbvGwWvSExiw3hohrQeSUrB3mF3NPJ0RN_3IMlMCpWZi_4lUQjetKH1-oLKGKX3JMJu67v45X1eyihUwLQ9zs0MWNCyp5Rd8kdNpVcpujlEEi0v8lsMJ7rPwWomt7akcYBBtSdVH5kuHTzrj0eNNVBm8-XlAokuM8NtKC_IuiwjVo05k-EgUtFk69kUiwfdCrmTLxlNu_pkjhghTzw1V9O4mivw"
+            />
+          </div>
+        </section>
+
+        {/* Leave Balances Grid */}
+        <div className="bg-white border border-border rounded-3xl p-8 shadow-sm">
+          <h2 className="text-base font-bold mb-6">Leave Balance ({new Date().getFullYear()})</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {balances.map((b: any) => (
-              <div key={b.id} className="bg-background rounded-xl p-4">
-                <p className="text-sm font-medium text-text-primary">{b.leaveType.name}</p>
-                <div className="flex items-end justify-between mt-2">
+              <div key={b.id} className="bg-background rounded-2xl p-6 border border-border/40 hover:scale-[1.01] transition-transform">
+                <p className="text-xs font-bold text-plum-accent uppercase tracking-wider">{b.leaveType.name}</p>
+                <div className="flex items-end justify-between mt-3">
                   <div>
-                    <span className="text-2xl font-bold text-primary">{b.remainingDays}</span>
-                    <span className="text-sm text-text-secondary ml-1">/ {b.totalDays}</span>
+                    <span className="text-3xl font-extrabold text-text-primary">{b.remainingDays}</span>
+                    <span className="text-xs text-text-secondary ml-1 font-semibold">/ {b.totalDays} days</span>
                   </div>
-                  <span className="text-xs text-text-secondary">{b.usedDays} used</span>
+                  <span className="text-[10px] font-bold text-text-secondary uppercase">{b.usedDays} used</span>
                 </div>
                 {/* Progress bar */}
-                <div className="mt-2 h-1.5 bg-border rounded-full overflow-hidden">
+                <div className="mt-3.5 h-1.5 bg-border rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-primary rounded-full transition-all"
+                    className="h-full bg-plum rounded-full transition-all"
                     style={{ width: `${(b.remainingDays / b.totalDays) * 100}%` }}
                   />
                 </div>
@@ -230,16 +256,16 @@ export function LeavePage() {
           </div>
         </div>
 
-        {/* Leave Requests */}
-        <div className="card p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-            <h2 className="text-base font-semibold flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-primary" />
+        {/* Leave Requests Logs */}
+        <div className="bg-white border border-border rounded-3xl p-8 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h2 className="text-base font-bold flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 text-plum-accent" />
               My Leave Requests
             </h2>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <select
-                className="form-input w-auto text-sm py-2"
+                className="py-2 px-4 border border-border bg-white rounded-lg text-xs outline-none"
                 value={filterStatus}
                 onChange={e => { setFilterStatus(e.target.value); setPage(1); }}
               >
@@ -248,7 +274,11 @@ export function LeavePage() {
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
               </select>
-              <button id="apply-leave-btn" onClick={() => setShowModal(true)} className="btn-primary btn-sm">
+              <button
+                id="apply-leave-btn"
+                onClick={() => setShowModal(true)}
+                className="bg-plum hover:bg-primary-700 text-white font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-1 shadow-sm"
+              >
                 <Plus className="w-4 h-4" />
                 Apply
               </button>
@@ -256,69 +286,69 @@ export function LeavePage() {
           </div>
 
           {isLoading ? (
-            <div className="space-y-3">
-              {[...Array(4)].map((_, i) => <div key={i} className="h-20 skeleton rounded-xl" />)}
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => <div key={i} className="h-24 skeleton rounded-2xl animate-pulse bg-background border border-border" />)}
             </div>
           ) : leaves.length === 0 ? (
-            <div className="text-center py-14">
-              <CalendarDays className="w-12 h-12 mx-auto mb-3 text-border" />
-              <p className="text-text-secondary">No leave requests found</p>
-              <button onClick={() => setShowModal(true)} className="btn-primary btn-sm mt-4">
+            <div className="text-center py-16 bg-background rounded-2xl border border-dashed border-border">
+              <Calendar className="w-12 h-12 mx-auto mb-3 text-text-secondary opacity-30" />
+              <p className="text-sm text-text-secondary font-semibold">No leave requests found</p>
+              <button onClick={() => setShowModal(true)} className="bg-plum hover:bg-primary-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl mt-4 shadow-sm">
                 Apply for Leave
               </button>
             </div>
           ) : (
-            <>
+            <div className="space-y-4">
               <div className="space-y-3">
                 {leaves.map((l: any) => (
-                  <div key={l.id} className="p-4 bg-background rounded-xl border border-border">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                      <div>
+                  <div key={l.id} className="p-5 bg-background rounded-2xl border border-border/60 hover:border-plum-accent/30 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                      <div className="space-y-1.5">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-text-primary">{l.leaveType.name}</span>
+                          <span className="text-sm font-bold text-text-primary">{l.leaveType.name}</span>
                           {getLeaveStatusBadge(l.status)}
                           {l.aiPriority && getPriorityBadge(l.aiPriority)}
                         </div>
-                        <p className="text-xs text-text-secondary mt-1">
+                        <p className="text-xs text-text-secondary">
                           {format(new Date(l.startDate), 'd MMM yyyy')} — {format(new Date(l.endDate), 'd MMM yyyy')}
-                          {' '}· {l.totalDays} working day(s)
+                          {' '}· <span className="font-semibold text-text-primary">{l.totalDays} working day(s)</span>
                         </p>
-                        <p className="text-xs text-text-primary mt-1.5 line-clamp-1">{l.reason}</p>
+                        <p className="text-xs text-text-primary bg-white p-3 rounded-lg border border-border/40 mt-2">{l.reason}</p>
                         {l.aiSummary && (
-                          <p className="text-xs text-primary mt-1 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" />
-                            {l.aiSummary}
-                          </p>
+                          <div className="text-xs text-plum-accent font-medium mt-2 flex items-center gap-1 bg-primary-50 px-3 py-1.5 rounded-lg border border-primary-100">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>AI summary: {l.aiSummary}</span>
+                          </div>
                         )}
                         {l.adminComment && (
-                          <p className="text-xs text-text-secondary mt-1 italic">
-                            Admin: {l.adminComment}
+                          <p className="text-xs text-text-secondary mt-1.5 italic font-medium">
+                            Admin comment: {l.adminComment}
                           </p>
                         )}
                       </div>
-                      <p className="text-xs text-text-secondary flex-shrink-0">
-                        {format(new Date(l.createdAt), 'd MMM')}
-                      </p>
+                      <span className="text-xs text-text-secondary font-semibold flex-shrink-0">
+                        {format(new Date(l.createdAt), 'd MMM yyyy')}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
 
               {pagination && pagination.totalPages > 1 && (
-                <div className="flex items-center justify-between mt-4 text-sm">
-                  <p className="text-text-secondary">{pagination.total} total requests</p>
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/40 text-xs">
+                  <p className="text-text-secondary font-semibold">{pagination.total} total requests</p>
                   <div className="flex gap-2">
-                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-ghost btn-sm border border-border disabled:opacity-40">
+                    <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40">
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="px-3 py-1.5 text-text-primary font-medium">{page} / {pagination.totalPages}</span>
-                    <button onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))} disabled={page === pagination.totalPages} className="btn-ghost btn-sm border border-border disabled:opacity-40">
+                    <span className="px-3 py-2 text-text-primary font-bold">{page} / {pagination.totalPages}</span>
+                    <button onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))} disabled={page === pagination.totalPages} className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40">
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

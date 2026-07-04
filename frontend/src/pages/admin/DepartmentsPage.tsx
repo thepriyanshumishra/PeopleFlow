@@ -11,48 +11,60 @@ export function DepartmentsPage() {
   const departments = (data as any[]) || [];
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="card p-6">
-        <h2 className="text-base font-semibold mb-5 flex items-center gap-2">
-          <Building2 className="w-4 h-4 text-primary" />
-          Departments
+    <div className="p-6 md:p-8 space-y-12 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
+      {/* Header */}
+      <header>
+        <h2 className="font-display text-3xl font-extrabold tracking-tight">
+          Departments <span className="handwritten-text text-3xl ml-1 text-plum-accent italic font-normal">divisions</span>
+        </h2>
+        <p className="text-text-secondary text-sm">Overview of organization departments, headcount, and managers.</p>
+      </header>
+
+      {/* Grid */}
+      <div className="bg-white border border-border rounded-3xl p-8 shadow-sm">
+        <h2 className="text-base font-bold mb-6 flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-plum-accent" />
+          Division Registry
         </h2>
 
         {isLoading ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => <div key={i} className="h-32 skeleton rounded-xl" />)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => <div key={i} className="h-32 skeleton rounded-2xl animate-pulse bg-background border border-border" />)}
           </div>
         ) : departments.length === 0 ? (
-          <div className="text-center py-14">
-            <Building2 className="w-12 h-12 mx-auto mb-3 text-border" />
-            <p className="text-text-secondary">No departments found</p>
+          <div className="text-center py-16 bg-background rounded-2xl border border-dashed border-border">
+            <Building2 className="w-12 h-12 mx-auto mb-3 text-text-secondary opacity-30" />
+            <p className="text-sm text-text-secondary font-semibold">No departments found</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {departments.map((dept: any) => (
-              <div key={dept.id} className="p-5 bg-background rounded-xl border border-border hover:border-primary/30 transition-colors">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-5 h-5 text-primary" />
+              <div key={dept.id} className="p-6 bg-background rounded-2xl border border-border hover:border-plum-accent/30 transition-all hover:scale-[1.01] flex flex-col justify-between h-44">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center flex-shrink-0 border border-primary-100">
+                    <Building2 className="w-5 h-5 text-plum-accent" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-text-primary truncate">{dept.name}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-text-primary text-sm truncate">{dept.name}</p>
                     {dept.description && (
-                      <p className="text-xs text-text-secondary truncate">{dept.description}</p>
+                      <p className="text-xs text-text-secondary font-semibold truncate mt-0.5">{dept.description}</p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 text-sm text-text-secondary">
-                  <Users className="w-3.5 h-3.5" />
-                  <span>{dept._count?.employees ?? 0} employees</span>
+
+                <div className="mt-4 pt-4 border-t border-border/40 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+                    <Users className="w-4 h-4 text-plum-accent" />
+                    <span>{dept._count?.employees ?? 0} active employees</span>
+                  </div>
+                  {dept.headEmployee && (
+                    <p className="text-xs text-text-secondary font-medium">
+                      Manager: <span className="font-bold text-text-primary">
+                        {dept.headEmployee.firstName} {dept.headEmployee.lastName}
+                      </span>
+                    </p>
+                  )}
                 </div>
-                {dept.headEmployee && (
-                  <p className="text-xs text-text-secondary mt-1.5">
-                    Head: <span className="font-medium text-text-primary">
-                      {dept.headEmployee.firstName} {dept.headEmployee.lastName}
-                    </span>
-                  </p>
-                )}
               </div>
             ))}
           </div>

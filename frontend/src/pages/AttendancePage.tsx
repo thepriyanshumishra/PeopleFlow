@@ -70,117 +70,128 @@ export function AttendancePage() {
   const monthLabel = new Date(year, month - 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Check-in / Check-out card */}
-      <div className="card p-6">
-        <h2 className="text-base font-semibold mb-5 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-primary" />
-          Today — {format(new Date(), 'EEEE, d MMMM yyyy')}
+    <div className="p-6 md:p-8 space-y-12 max-w-[1440px] mx-auto animate-fade-in text-text-primary">
+      {/* Header */}
+      <header>
+        <h2 className="font-display text-3xl font-extrabold tracking-tight">
+          Attendance Portal <span className="handwritten-text text-3xl ml-1 text-plum-accent italic font-normal">tracking</span>
         </h2>
-        <div className="grid sm:grid-cols-3 gap-4 mb-5">
+        <p className="text-text-secondary text-sm">Register your check-ins and audit monthly status reports.</p>
+      </header>
+
+      {/* Clocking dashboard */}
+      <div className="bg-white border border-border rounded-3xl p-8 shadow-sm">
+        <h3 className="text-base font-bold mb-6 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-plum-accent" />
+          Today — {format(new Date(), 'EEEE, d MMMM yyyy')}
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
           {[
             { label: 'Check In', value: today?.checkIn ? format(new Date(today.checkIn), 'hh:mm a') : '—' },
             { label: 'Check Out', value: today?.checkOut ? format(new Date(today.checkOut), 'hh:mm a') : '—' },
-            { label: 'Total Hours', value: today?.totalHours ? `${today.totalHours}h` : '—' },
+            { label: 'Total Hours', value: today?.totalHours ? `${today.totalHours} hrs` : '—' },
           ].map(({ label, value }) => (
-            <div key={label} className="bg-background rounded-xl p-4 text-center">
-              <p className="text-xs text-text-secondary mb-1">{label}</p>
-              <p className="text-xl font-bold text-text-primary">{value}</p>
+            <div key={label} className="bg-background rounded-2xl p-5 border border-border/50 text-center">
+              <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider mb-1">{label}</p>
+              <p className="text-xl font-bold">{value}</p>
             </div>
           ))}
         </div>
+
         {today?.status && (
-          <div className="mb-4 text-center">
-            <span className="text-sm text-text-secondary mr-2">Status:</span>
+          <div className="mb-6 flex justify-center items-center gap-2">
+            <span className="text-xs font-semibold text-text-secondary">Current Status:</span>
             {getAttendanceStatusBadge(today.status)}
           </div>
         )}
-        <div className="flex gap-3">
+
+        <div className="flex gap-4">
           <button
             id="attendance-checkin"
             onClick={() => checkInMutation.mutate()}
             disabled={!!today?.checkIn || checkInMutation.isPending}
-            className="btn-primary flex-1 py-3 disabled:opacity-40"
+            className="w-1/2 py-3.5 bg-plum hover:bg-primary-700 text-white font-bold text-xs rounded-xl disabled:opacity-40 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
           >
             <LogIn className="w-4 h-4" />
-            {checkInMutation.isPending ? 'Checking in…' : 'Check In'}
+            {checkInMutation.isPending ? 'Clocking in…' : 'Clock In'}
           </button>
           <button
             id="attendance-checkout"
             onClick={() => checkOutMutation.mutate()}
             disabled={!today?.checkIn || !!today?.checkOut || checkOutMutation.isPending}
-            className="btn-secondary flex-1 py-3 disabled:opacity-40"
+            className="w-1/2 py-3.5 bg-white border border-border hover:bg-background text-text-primary font-bold text-xs rounded-xl disabled:opacity-40 shadow-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
           >
             <LogOut className="w-4 h-4" />
-            {checkOutMutation.isPending ? 'Checking out…' : 'Check Out'}
+            {checkOutMutation.isPending ? 'Clocking out…' : 'Clock Out'}
           </button>
         </div>
       </div>
 
-      {/* Monthly Summary */}
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-primary" />
-            {monthLabel}
-          </h2>
+      {/* Monthly details */}
+      <div className="bg-white border border-border rounded-3xl p-8 shadow-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-base font-bold flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-plum-accent" />
+            <span>Monthly summary for <strong className="text-plum-accent">{monthLabel}</strong></span>
+          </h3>
           <div className="flex items-center gap-2">
-            <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-background border border-border">
-              <ChevronLeft className="w-4 h-4 text-text-secondary" />
+            <button onClick={prevMonth} className="p-2 border border-border hover:bg-background rounded-lg">
+              <ChevronLeft className="w-4 h-4" />
             </button>
-            <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-background border border-border">
-              <ChevronRight className="w-4 h-4 text-text-secondary" />
+            <button onClick={nextMonth} className="p-2 border border-border hover:bg-background rounded-lg">
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 mb-8">
           {[
-            { label: 'Present', value: summary.present ?? 0, bg: 'bg-green-50', text: 'text-green-700' },
-            { label: 'Late', value: summary.late ?? 0, bg: 'bg-orange-50', text: 'text-orange-700' },
-            { label: 'Half Day', value: summary.halfDay ?? 0, bg: 'bg-yellow-50', text: 'text-yellow-700' },
-            { label: 'On Leave', value: summary.leave ?? 0, bg: 'bg-blue-50', text: 'text-blue-700' },
-            { label: 'Absent', value: summary.absent ?? 0, bg: 'bg-red-50', text: 'text-red-700' },
-            { label: 'Total Hrs', value: `${summary.totalHours ?? 0}h`, bg: 'bg-primary-50', text: 'text-primary' },
+            { label: 'Present', value: summary.present ?? 0, bg: 'bg-green-50/50', text: 'text-green-700 border-green-100' },
+            { label: 'Late', value: summary.late ?? 0, bg: 'bg-orange-50/50', text: 'text-orange-700 border-orange-100' },
+            { label: 'Half Day', value: summary.halfDay ?? 0, bg: 'bg-yellow-50/50', text: 'text-yellow-700 border-yellow-100' },
+            { label: 'On Leave', value: summary.leave ?? 0, bg: 'bg-blue-50/50', text: 'text-blue-700 border-blue-100' },
+            { label: 'Absent', value: summary.absent ?? 0, bg: 'bg-red-50/50', text: 'text-red-700 border-red-100' },
+            { label: 'Total Hrs', value: `${summary.totalHours ?? 0}h`, bg: 'bg-primary-50/50', text: 'text-plum-accent border-primary-100' },
           ].map(({ label, value, bg, text }) => (
-            <div key={label} className={`${bg} rounded-xl p-3 text-center`}>
-              <p className={`text-2xl font-bold ${text}`}>{value}</p>
-              <p className="text-[11px] text-text-secondary mt-0.5">{label}</p>
+            <div key={label} className={`${bg} border rounded-2xl p-4 text-center`}>
+              <p className={`text-2xl font-extrabold ${text.split(' ')[0]}`}>{value}</p>
+              <p className="text-[10px] text-text-secondary font-bold uppercase mt-1">{label}</p>
             </div>
           ))}
         </div>
 
-        {/* History Table */}
+        {/* History table */}
         {isLoading ? (
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => <div key={i} className="h-12 skeleton rounded-lg" />)}
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => <div key={i} className="h-12 skeleton rounded-xl animate-pulse bg-background border border-border" />)}
           </div>
         ) : records.length === 0 ? (
-          <div className="text-center py-12 text-text-secondary">
-            <Calendar className="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p>No attendance records for {monthLabel}</p>
+          <div className="text-center py-16 bg-background rounded-2xl border border-dashed border-border">
+            <Calendar className="w-12 h-12 mx-auto mb-3 text-text-secondary opacity-30" />
+            <p className="text-sm text-text-secondary font-semibold">No attendance records for {monthLabel}</p>
           </div>
         ) : (
           <>
-            <div className="table-container rounded-xl border border-border">
-              <table className="table">
-                <thead>
+            <div className="overflow-x-auto rounded-2xl border border-border">
+              <table className="min-w-full divide-y divide-border text-left text-sm">
+                <thead className="bg-background font-bold text-text-secondary text-xs uppercase tracking-wider">
                   <tr>
-                    <th>Date</th>
-                    <th>Check In</th>
-                    <th>Check Out</th>
-                    <th>Hours</th>
-                    <th>Status</th>
+                    <th className="px-6 py-4">Date</th>
+                    <th className="px-6 py-4">Check In</th>
+                    <th className="px-6 py-4">Check Out</th>
+                    <th className="px-6 py-4">Hours</th>
+                    <th className="px-6 py-4">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border bg-white font-medium text-text-primary">
                   {records.map((r: any) => (
-                    <tr key={r.id}>
-                      <td className="font-medium">{format(new Date(r.attendanceDate), 'EEE, d MMM')}</td>
-                      <td>{r.checkIn ? format(new Date(r.checkIn), 'hh:mm a') : '—'}</td>
-                      <td>{r.checkOut ? format(new Date(r.checkOut), 'hh:mm a') : '—'}</td>
-                      <td>{r.totalHours ? `${r.totalHours}h` : '—'}</td>
-                      <td>{getAttendanceStatusBadge(r.status)}</td>
+                    <tr key={r.id} className="hover:bg-primary-50/10 transition-colors">
+                      <td className="px-6 py-4 font-bold">{format(new Date(r.attendanceDate), 'EEE, d MMM yyyy')}</td>
+                      <td className="px-6 py-4">{r.checkIn ? format(new Date(r.checkIn), 'hh:mm a') : '—'}</td>
+                      <td className="px-6 py-4">{r.checkOut ? format(new Date(r.checkOut), 'hh:mm a') : '—'}</td>
+                      <td className="px-6 py-4">{r.totalHours ? `${r.totalHours} hrs` : '—'}</td>
+                      <td className="px-6 py-4">{getAttendanceStatusBadge(r.status)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -189,25 +200,25 @@ export function AttendancePage() {
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 text-sm">
-                <p className="text-text-secondary">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/40 text-xs">
+                <p className="text-text-secondary font-semibold">
                   Showing {records.length} of {pagination.total} records
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="btn-ghost btn-sm border border-border disabled:opacity-40"
+                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
-                  <span className="px-3 py-1.5 text-text-primary font-medium">
+                  <span className="px-3 py-2 text-text-primary font-bold">
                     {page} / {pagination.totalPages}
                   </span>
                   <button
                     onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
                     disabled={page === pagination.totalPages}
-                    className="btn-ghost btn-sm border border-border disabled:opacity-40"
+                    className="p-2 border border-border hover:bg-background rounded-lg disabled:opacity-40"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
