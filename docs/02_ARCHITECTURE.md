@@ -53,7 +53,7 @@ PeopleFlow follows a modern client-server architecture.
                │
 ───────────────▼────────────────
 ┌─────────────────────────────┐
-│ PostgreSQL / MySQL Database │
+│       SQLite Database       │
 └─────────────────────────────┘
 
 ```
@@ -298,6 +298,8 @@ It stores:
 - Leave
 - Payroll
 - Documents
+- Notifications
+- Activity Logs
 
 No business logic should exist inside the database.
 

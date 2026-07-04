@@ -47,19 +47,23 @@ For in-depth explanations, refer to our internal specifications:
 
 ### Prerequisites
 *   [Node.js](https://nodejs.org/) (v18+ recommended)
-*   [PostgreSQL](https://www.postgresql.org/) (v14+ running locally)
+*   (Optional) [PostgreSQL](https://www.postgresql.org/) (v14+) — defaults to SQLite for ease of local development
 
 ---
 
 ### 1. Database Configuration
-Ensure you have a local PostgreSQL instance running. Create a database named `peopleflow_db`.
-Create a `.env` file in the `backend/` directory:
+PeopleFlow is configured to run on **SQLite** out-of-the-box for seamless local setup. The database file (`dev.db`) will be automatically created inside the `backend/prisma/` directory.
+
+Create a `.env` file in the `backend/` directory by copying `.env.example`:
 ```env
-PORT=5000
-DATABASE_URL="postgresql://<user>:<password>@localhost:5432/peopleflow_db"
+PORT=5001
+NODE_ENV=development
+DATABASE_URL="file:./dev.db"
 JWT_SECRET="your_jwt_secret_token"
 GEMINI_API_KEY="your_google_gemini_api_key"
 ```
+
+*Note: If you prefer to use PostgreSQL, you can change the provider in `backend/prisma/schema.prisma` to `postgresql` and specify your postgres URL in `DATABASE_URL`.*
 
 ---
 
@@ -72,19 +76,19 @@ GEMINI_API_KEY="your_google_gemini_api_key"
    ```bash
    npm install
    ```
-3. Run the Prisma database migrations:
+3. Sync the Prisma database schema:
    ```bash
-   npx prisma migrate dev --name init
+   npx prisma db push
    ```
 4. Seed the database with core demo data:
    ```bash
-   npm run seed
+   npm run db:seed
    ```
 5. Start the backend development server:
    ```bash
    npm run dev
    ```
-The backend server runs at `http://localhost:5000`.
+The backend server runs at `http://localhost:5001`.
 
 ---
 
@@ -99,7 +103,7 @@ The backend server runs at `http://localhost:5000`.
    ```
 3. Create a `.env` file:
    ```env
-   VITE_API_URL="http://localhost:5000/api"
+   VITE_API_URL="http://localhost:5001/api"
    ```
 4. Start the frontend development server:
    ```bash

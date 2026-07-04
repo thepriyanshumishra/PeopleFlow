@@ -47,15 +47,15 @@ The database should prioritize correctness over optimization during the MVP phas
 
 # 3. Database Engine
 
-Preferred Database
+Default Database
+
+SQLite (configured for easy local development setup, no database server required)
+
+Production Database
 
 PostgreSQL
 
-Alternative
-
-MySQL
-
-The application should remain compatible with any modern relational SQL database with minimal modifications.
+The application remains fully compatible with PostgreSQL and MySQL. The Prisma schema can be pointed to PostgreSQL/MySQL via the DATABASE_URL environment variable.
 
 ---
 
@@ -132,6 +132,7 @@ The PeopleFlow database consists of the following primary entities.
 - Payroll
 - Documents
 - Notifications
+- Activity Logs
 
 ---
 
@@ -439,6 +440,32 @@ Leave Approved
 Payroll Generated
 
 Attendance Updated
+
+---
+
+## Activity Logs
+
+Purpose
+
+Stores general audit and system activity logs for employees and administrators.
+
+Columns
+
+- id
+- module (String: attendance, leave, payroll, employee, department, auth, system, ai)
+- action (String: check_in, check_out, leave_requested, leave_approved, etc.)
+- description (String: human-readable log message)
+- actor_id (Integer, Nullable: actor ID)
+- actor_name (String, Nullable: actor display name)
+- actor_role (String, Nullable: Admin | Employee)
+- target_id (Integer, Nullable: ID of modified/target resource)
+- target_name (String, Nullable: Name/Title of target resource)
+- employee_id (Integer, Nullable: Scoped employee ID)
+- department_id (Integer, Nullable: Scoped department ID)
+- metadata (String, Nullable: Serialized JSON metadata to maintain SQLite database compatibility)
+- severity (String: info | success | warning | error | ai)
+- is_admin_only (Boolean: visible only to admins)
+- created_at (DateTime)
 
 ---
 

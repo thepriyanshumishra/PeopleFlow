@@ -562,7 +562,7 @@ Project constraints include:
 - Team-based parallel development
 - Modular architecture
 - Production-quality code
-- PostgreSQL/MySQL relational database
+- SQLite/PostgreSQL relational database
 - Minimal third-party dependencies
 - AI integration should provide real value
 
