@@ -52,7 +52,7 @@ export const logActivity = async (input: LogActivityInput): Promise<void> => {
         targetName: input.targetName ?? null,
         employeeId: input.employeeId ?? null,
         departmentId: input.departmentId ?? null,
-        metadata: input.metadata ? (input.metadata as object) : undefined,
+        metadata: input.metadata ? JSON.stringify(input.metadata) : undefined,
         severity: input.severity ?? 'info',
         isAdminOnly: input.isAdminOnly ?? false,
       },
@@ -147,8 +147,23 @@ export const getActivityFeed = async (params: ActivityFeedParams) => {
     prisma.activityLog.count({ where }),
   ]);
 
+  const parsedActivities = activities.map((a) => {
+    let parsedMetadata = null;
+    if (a.metadata) {
+      try {
+        parsedMetadata = JSON.parse(a.metadata);
+      } catch (e) {
+        parsedMetadata = a.metadata;
+      }
+    }
+    return {
+      ...a,
+      metadata: parsedMetadata,
+    };
+  });
+
   return {
-    activities,
+    activities: parsedActivities,
     pagination: {
       page,
       limit,

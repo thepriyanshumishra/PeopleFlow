@@ -7,6 +7,10 @@ import { LoginPage } from '@/pages/LoginPage';
 import { LandingPage } from '@/pages/LandingPage';
 import { SplashPage } from '@/pages/SplashPage';
 import { LoadingPage } from '@/pages/LoadingPage';
+import { FeaturesPage } from '@/pages/FeaturesPage';
+import { PricingPage } from '@/pages/PricingPage';
+import { AboutPage } from '@/pages/AboutPage';
+import { ContactPage } from '@/pages/ContactPage';
 
 // Error pages
 import { NotFoundPage } from '@/pages/errors/NotFoundPage';
@@ -71,6 +75,10 @@ export default function App() {
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+      <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
 
       {/* Error pages */}
       <Route path="/404" element={<NotFoundPage />} />

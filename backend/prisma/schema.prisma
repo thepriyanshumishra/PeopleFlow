@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -276,7 +276,7 @@ model ActivityLog {
   employeeId   Int?      @map("employee_id")
   departmentId Int?      @map("department_id")
   // Extra structured data (leave type, hours, salary amount, etc.)
-  metadata     Json?
+  metadata     String?
   // Visual properties
   severity     String    @default("info")  // info | success | warning | error | ai
   isAdminOnly  Boolean   @default(false)   @map("is_admin_only")
