@@ -217,53 +217,70 @@ export function FeaturesPage() {
       {/* Footer */}
       <footer className="bg-[#1a1b26] text-white/70 py-16 w-full mt-auto text-left">
         <div className="max-w-[1440px] mx-auto px-6 md:px-12">
-          <div className="flex justify-center md:justify-start mb-8">
+          {/* Logo Brand row */}
+          <div className="flex justify-center md:justify-start mb-10">
             <span className="font-display text-3xl font-extrabold tracking-tight">
               <span className="text-primary-400">People</span>
               <span className="text-gray-400">Flow</span>
             </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 border-b border-white/10 pb-12 mb-8 text-xs w-full">
+
+          {/* Links Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 border-b border-white/10 pb-12 mb-8 text-xs w-full text-white/70">
             <div>
-              <h4 className="font-bold text-white mb-4">Product</h4>
-              <ul className="space-y-2 flex flex-col">
-                <li><Link className="hover:text-white transition-colors" to="/features">Features</Link></li>
-                <li><Link className="hover:text-white transition-colors" to="/pricing">Pricing</Link></li>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-[10px] text-primary-400">Product</h4>
+              <ul className="space-y-2.5 flex flex-col">
+                <li><Link className="hover:text-white transition-colors" to="/features">Core Features</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/pricing">Pricing Plans</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/login">Employee Login</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/login">Request Demo</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-4">Resources</h4>
-              <ul className="space-y-2 flex flex-col">
-                <li><a className="hover:text-white transition-colors" href="#">PRD Specification</a></li>
-                <li><a className="hover:text-white transition-colors" href="#">Architecture Specs</a></li>
-                <li><a className="hover:text-white transition-colors" href="#">Database Schema Contract</a></li>
-                <li><a className="hover:text-white transition-colors" href="#">API Endpoint Docs</a></li>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-[10px] text-primary-400">Self-Service</h4>
+              <ul className="space-y-2.5 flex flex-col">
+                <li><Link className="hover:text-white transition-colors" to="/dashboard">Dashboard</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/attendance">Clock-In/Out</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/leave">Leave Request</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/payroll">My Payslips</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-4">About us</h4>
-              <ul className="space-y-2 flex flex-col">
-                <li><Link className="hover:text-white transition-colors" to="/about">Our company</Link></li>
-                <li><Link className="hover:text-white transition-colors" to="/contact">Contact us</Link></li>
-                <li><a className="hover:text-white transition-colors" href="#">Developer Team</a></li>
-                <li><a className="hover:text-white transition-colors" href="#">Brand Guidelines</a></li>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-[10px] text-primary-400">Administration</h4>
+              <ul className="space-y-2.5 flex flex-col">
+                <li><Link className="hover:text-white transition-colors" to="/admin/employees">Personnel Directory</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/admin/leave">Leave Approvals</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/admin/attendance">Shift Operations</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/admin/payroll">Payroll Generation</Link></li>
               </ul>
             </div>
             <div>
+              <h4 className="font-bold text-white mb-4 uppercase tracking-wider text-[10px] text-primary-400">Company</h4>
+              <ul className="space-y-2.5 flex flex-col">
+                <li><Link className="hover:text-white transition-colors" to="/about">Our Story</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/contact">Contact Us</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/help">Help Center</Link></li>
+                <li><Link className="hover:text-white transition-colors" to="/calendar">Calendar Workspace</Link></li>
+              </ul>
+            </div>
+            <div className="col-span-2 md:col-span-1">
               <button className="flex items-center gap-2 mb-4 text-white hover:opacity-80 transition-opacity">
-                <Globe className="w-4 h-4" />
+                <Globe className="w-4 h-4 text-primary-400" />
                 <span className="text-xs font-bold">English</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
-              <div className="text-xs opacity-80 leading-relaxed mt-4 border-t border-white/10 pt-4">
+              <div className="text-[11px] opacity-75 leading-relaxed mt-2">
                 PeopleFlow is an intelligent, integrated HRMS platform that handles attendance, leaves, payroll, and directory operations in a single, modern interface powered by Gemini AI.
-                <br /><br />
-                PeopleFlow's unique value proposition is to provide enterprise-grade HR management that is incredibly easy to use, beautiful to look at, and smart by design.
               </div>
             </div>
           </div>
-          <div className="text-center md:text-left text-xs opacity-60 text-white/50">
-            © 2026 PeopleFlow. All rights reserved.
+
+          <div className="flex flex-col md:flex-row justify-between items-center text-xs opacity-60 text-white/50 gap-2">
+            <span>© 2026 PeopleFlow. All rights reserved.</span>
+            <div className="flex gap-4">
+              <Link className="hover:text-white transition-colors" to="/settings">System Settings</Link>
+              <Link className="hover:text-white transition-colors" to="/profile">User Profile</Link>
+            </div>
           </div>
         </div>
       </footer>
