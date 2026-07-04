@@ -1,59 +1,53 @@
 import React from 'react';
 
-type BadgeVariant = 'green' | 'red' | 'yellow' | 'orange' | 'blue' | 'gray' | 'purple';
-
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: BadgeVariant;
-  dot?: boolean;
+  variant?: 'green' | 'red' | 'yellow' | 'blue' | 'orange' | 'gray' | 'purple';
   className?: string;
 }
 
-export const Badge: React.FC<BadgeProps> = ({ children, variant = 'gray', dot = false, className = '' }) => {
-  const variantClass = `badge-${variant}`;
-
+export function Badge({ children, variant = 'gray', className = '' }: BadgeProps) {
   return (
-    <span className={`badge ${variantClass} ${className}`}>
-      {dot && (
-        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 inline-block bg-current`} />
-      )}
+    <span className={`badge badge-${variant} ${className}`}>
       {children}
     </span>
   );
-};
+}
 
-// Predefined status badges
-export const getAttendanceStatusBadge = (status: string): React.ReactNode => {
-  const map: Record<string, { variant: BadgeVariant; label: string }> = {
-    Present: { variant: 'green', label: 'Present' },
-    Absent: { variant: 'red', label: 'Absent' },
-    'Half Day': { variant: 'yellow', label: 'Half Day' },
-    Leave: { variant: 'blue', label: 'On Leave' },
-    Late: { variant: 'orange', label: 'Late' },
+// Attendance status badge
+export function getAttendanceStatusBadge(status: string) {
+  const map: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+    Present:  { label: 'Present', variant: 'green' },
+    Late:     { label: 'Late', variant: 'orange' },
+    'Half Day': { label: 'Half Day', variant: 'yellow' },
+    Leave:    { label: 'On Leave', variant: 'blue' },
+    Absent:   { label: 'Absent', variant: 'red' },
+    Holiday:  { label: 'Holiday', variant: 'purple' },
+    Weekend:  { label: 'Weekend', variant: 'gray' },
   };
+  const cfg = map[status] || { label: status, variant: 'gray' as const };
+  return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
+}
 
-  const config = map[status] || { variant: 'gray' as BadgeVariant, label: status };
-  return <Badge variant={config.variant} dot>{config.label}</Badge>;
-};
-
-export const getLeaveStatusBadge = (status: string): React.ReactNode => {
-  const map: Record<string, { variant: BadgeVariant }> = {
-    Pending: { variant: 'orange' },
-    Approved: { variant: 'green' },
-    Rejected: { variant: 'red' },
+// Leave request status badge
+export function getLeaveStatusBadge(status: string) {
+  const map: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+    Pending:  { label: 'Pending', variant: 'yellow' },
+    Approved: { label: 'Approved', variant: 'green' },
+    Rejected: { label: 'Rejected', variant: 'red' },
+    Cancelled:{ label: 'Cancelled', variant: 'gray' },
   };
+  const cfg = map[status] || { label: status, variant: 'gray' as const };
+  return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
+}
 
-  const config = map[status] || { variant: 'gray' as BadgeVariant };
-  return <Badge variant={config.variant} dot>{status}</Badge>;
-};
-
-export const getPriorityBadge = (priority: string): React.ReactNode => {
-  const map: Record<string, { variant: BadgeVariant }> = {
-    High: { variant: 'red' },
+// AI priority badge
+export function getPriorityBadge(priority: string) {
+  const map: Record<string, { variant: BadgeProps['variant'] }> = {
+    High:   { variant: 'red' },
     Medium: { variant: 'orange' },
-    Low: { variant: 'green' },
+    Low:    { variant: 'green' },
   };
-
-  const config = map[priority] || { variant: 'gray' as BadgeVariant };
-  return <Badge variant={config.variant}>{priority}</Badge>;
-};
+  const cfg = map[priority] || { variant: 'gray' as const };
+  return <Badge variant={cfg.variant}>AI: {priority}</Badge>;
+}
