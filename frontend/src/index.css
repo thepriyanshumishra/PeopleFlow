@@ -18,10 +18,10 @@
     line-height: 1.5;
   }
 
-  h1 { @apply text-3xl font-bold text-text-primary; }
-  h2 { @apply text-2xl font-semibold text-text-primary; }
-  h3 { @apply text-xl font-medium text-text-primary; }
-  h4 { @apply text-lg font-medium text-text-primary; }
+  h1 { @apply font-display text-3xl font-bold text-text-primary; }
+  h2 { @apply font-display text-2xl font-semibold text-text-primary; }
+  h3 { @apply font-display text-xl font-medium text-text-primary; }
+  h4 { @apply font-display text-lg font-medium text-text-primary; }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -229,5 +229,18 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
     @apply rounded;
+  }
+
+  /* Redesign helper classes */
+  .handwritten-text {
+    font-family: 'Caveat', cursive;
+  }
+
+  .plum-accent {
+    color: #714b67;
+  }
+
+  .bg-plum {
+    background-color: #714b67;
   }
 }

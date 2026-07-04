@@ -13,6 +13,8 @@ import { AdminAttendancePage } from '@/pages/admin/AdminAttendancePage';
 import { AdminPayrollPage } from '@/pages/admin/AdminPayrollPage';
 import { DepartmentsPage } from '@/pages/admin/DepartmentsPage';
 
+import { LandingPage } from '@/pages/LandingPage';
+
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
@@ -33,10 +35,10 @@ function GuestRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
 
       <Route element={<PrivateRoute><MainLayout /></PrivateRoute>}>
-        <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/attendance" element={<AttendancePage />} />
         <Route path="/leave" element={<LeavePage />} />
